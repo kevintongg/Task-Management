@@ -1,0 +1,558 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables */
+:root {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-primary-light: #60a5fa;
+  --color-secondary: #8b5cf6;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-900: #111827;
+
+  /* Animation durations */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Base styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans antialiased text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-variation-settings: normal;
+    text-rendering: optimizeLegibility;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus styles */
+  *:focus {
+    @apply outline-none;
+  }
+
+  *:focus-visible {
+    @apply ring-2 ring-blue-500 ring-offset-2 outline-none;
+  }
+
+  /* Selection styles */
+  ::selection {
+    @apply bg-blue-100 text-blue-900;
+  }
+
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f3f4f6;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* Button variants */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-blue-500;
+  }
+
+  .btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-blue-500;
+  }
+
+  /* Input styles */
+  .input {
+    @apply block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white;
+  }
+
+  .input-error {
+    @apply border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-lg;
+  }
+
+  .card-hover {
+    @apply hover:shadow-md transition-shadow duration-200;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    border: 2px solid #f3f4f6;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+
+  .dark .spinner {
+    border-color: #374151;
+    border-top-color: #60a5fa;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600;
+  }
+
+  /* Task priority indicators */
+  .priority-high {
+    @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700;
+  }
+
+  .priority-medium {
+    @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700;
+  }
+
+  .priority-low {
+    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700;
+  }
+
+  /* Status indicators */
+  .status-completed {
+    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300;
+  }
+
+  .status-pending {
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300;
+  }
+
+  .status-overdue {
+    @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Aspect ratio utilities */
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Safe area utilities for mobile */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Scrolling utilities */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Dropdown styles */
+  .dropdown-menu {
+    @apply absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700;
+  }
+
+  .dropdown-item {
+    @apply block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700;
+  }
+
+  /* Form styles */
+  .form-input {
+    @apply block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1;
+  }
+
+  .form-error {
+    @apply text-red-600 dark:text-red-400 text-sm mt-1;
+  }
+
+  .form-success {
+    @apply text-green-600 dark:text-green-400 text-sm mt-1;
+  }
+
+  /* Utility classes */
+  .text-muted {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  .border-light {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  .bg-light {
+    @apply bg-gray-50 dark:bg-gray-800;
+  }
+
+  /* Focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+  }
+
+  /* Dark mode specific overrides */
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Ensure proper text contrast in dark mode */
+  .dark .text-black {
+    @apply text-white;
+  }
+
+  .dark .bg-white {
+    @apply bg-gray-800;
+  }
+
+  /* Prevent white flash during theme toggle */
+  .dark button[class*="bg-white"] {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+  }
+
+  .dark [class*="bg-white"][class*="dark:bg-gray-800"] {
+    background-color: rgb(31 41 55) !important; /* gray-800 */
+  }
+
+  .dark [class*="bg-white"][class*="dark:bg-gray-700"] {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+  }
+
+  /* Force immediate dark mode for Headless UI components */
+  .dark [data-headlessui-state] {
+    transition: none !important;
+  }
+
+  .dark [data-headlessui-state][class*="bg-white"] {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+  }
+
+  /* Specific fixes for the problematic elements */
+  .dark button[id*="headlessui-listbox-button"] {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+    border-color: rgb(75 85 99) !important; /* gray-600 */
+  }
+
+  .dark button[class*="bg-white dark:bg-gray-800"] {
+    background-color: rgb(31 41 55) !important; /* gray-800 */
+    border-color: rgb(75 85 99) !important; /* gray-600 */
+  }
+
+  /* Disable transitions during theme change to prevent flash */
+  .dark * {
+    transition-duration: 0s !important;
+  }
+
+  /* Re-enable transitions after theme change */
+  .dark *:not([data-theme-transitioning]) {
+    transition-duration: revert !important;
+  }
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* React Beautiful DnD specific styles */
+.react-beautiful-dnd-dragging {
+  @apply shadow-lg;
+}
+
+.react-beautiful-dnd-drag-handle {
+  @apply cursor-grab;
+}
+
+.react-beautiful-dnd-drag-handle:active {
+  @apply cursor-grabbing;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    @apply text-black bg-white;
+  }
+
+  .card {
+    @apply shadow-none border border-gray-400;
+  }
+}
+
+/* Dark mode support (if needed in the future) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-auto {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    @apply border-2;
+  }
+
+  .card {
+    @apply border-2 border-gray-800;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+.focus-visible {
+  @apply ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Custom checkbox and radio styles */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  @apply bg-blue-600 border-blue-600;
+}
+
+/* Loading state for images */
+img[data-loading="true"] {
+  @apply bg-gray-200 animate-pulse;
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply absolute z-50 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg opacity-0 pointer-events-none transition-opacity duration-200;
+}
+
+.tooltip.show {
+  @apply opacity-100;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  .mobile-full {
+    @apply w-full;
+  }
+
+  .mobile-hidden {
+    @apply hidden;
+  }
+
+  /* Improve touch targets on mobile */
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Container max-widths */
+.container-xs {
+  max-width: 20rem;
+}
+
+.container-sm {
+  max-width: 24rem;
+}
+
+.container-md {
+  max-width: 28rem;
+}
+
+.container-lg {
+  max-width: 32rem;
+}
+
+.container-xl {
+  max-width: 36rem;
+}
+
+/* Z-index utilities */
+.z-dropdown {
+  z-index: 1000;
+}
+
+.z-sticky {
+  z-index: 1020;
+}
+
+.z-fixed {
+  z-index: 1030;
+}
+
+.z-modal-backdrop {
+  z-index: 1040;
+}
+
+.z-modal {
+  z-index: 1050;
+}
+
+.z-popover {
+  z-index: 1060;
+}
+
+.z-tooltip {
+  z-index: 1070;
+}

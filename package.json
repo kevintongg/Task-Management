@@ -1,0 +1,63 @@
+{
+  "name": "task-management-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A full-stack task management web app built with React, Vite, Tailwind CSS, and Supabase",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx,js,jsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist coverage .vite",
+    "prepare": "husky install || true"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@supabase/supabase-js": "^2.38.4",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^13.4.0",
+    "@types/node": "^24.0.3",
+    "@types/react": "^18.2.37",
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/react-dom": "^18.2.15",
+    "@vitejs/plugin-react": "^4.1.1",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.53.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.8.3",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "react",
+    "vite",
+    "tailwindcss",
+    "supabase",
+    "task-management",
+    "trello-clone"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

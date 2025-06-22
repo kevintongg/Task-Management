@@ -1,0 +1,446 @@
+# Dependencies
+node_modules/
+.npm
+.pnpm-debug.log*
+.yarn-integrity
+.yarn-error.log
+.pnpm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+out/
+.vercel/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.vite/
+
+# Runtime and temporary files
+*.log
+logs/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.tmp
+*.temp
+.tmp
+.temp
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+*.sublime-project
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Vim
+*.swp
+*.swo
+*.un~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+test-results/
+playwright-report/
+test-results.xml
+
+# Storybook
+storybook-static/
+.storybook/dist/
+
+# Miscellaneous
+*.tgz
+*.tar.gz
+*.zip
+*.7z
+*.dmg
+*.iso
+*.jar
+*.war
+*.ear
+*.sar
+*.class
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Tailwind CSS
+tailwind.config.js.timestamp-*
+
+# TypeScript
+*.tsbuildinfo
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Rollup
+.rollup.cache/
+
+# Turborepo
+.turbo/
+
+# Vercel
+.vercel
+
+# Netlify
+.netlify/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Local Supabase files
+supabase/.temp/
+supabase/.branches/
+supabase/.git/
+
+# Sentry
+.sentryclirc
+
+# Docker
+.docker/
+Dockerfile.prod
+docker-compose.override.yml
+.dockerignore
+
+# Kubernetes
+k8s/
+*.yaml.bak
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# MacOS
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+.project
+.externalToolBuilders/
+*.launch
+.pydevproject
+.cproject
+.autotools
+.factorypath
+.buildpath
+.target
+.tern-project
+.texlipse
+.springBeans
+.recommenders/
+.apt_generated/
+.cache-main
+.scala_dependencies
+.worksheet
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs
+hs_err_pid*
+
+# Python (for any Python tools/scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Archive files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+
+# Generated files
+generated/
+gen/
+
+# API keys and secrets (extra safety)
+*secret*
+*key*
+*token*
+*password*
+*credential*
+!**/src/**/*key* # Allow key files in source code
+!**/src/**/*secret* # Allow secret files in source code
+!**/src/**/*token* # Allow token files in source code
+!**/src/**/*password* # Allow password files in source code
+!**/src/**/*credential* # Allow credential files in source code
+
+# Analytics and tracking
+.vercel/
+.analytics/
+
+# Sentry
+.sentryclirc
+sentry.properties
+
+# PWA
+workbox-*.js
+sw.js
+service-worker.js
+workbox-sw.js
+precache-manifest.*.js
+
+# Miscellaneous
+.history/
+.vscode/
+.fleet/
