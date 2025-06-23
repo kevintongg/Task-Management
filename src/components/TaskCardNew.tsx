@@ -14,9 +14,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { TaskCardProps, TaskUpdate } from '../types'
 
 /**
- * Individual task card component with drag-and-drop support
+ * Individual task card component (new version) with drag-and-drop support
  */
-const TaskCard: React.FC<TaskCardProps> = ({
+const TaskCardNew: React.FC<TaskCardProps> = ({
   task,
   category,
   onUpdate,
@@ -437,4 +437,4 @@ const TaskCard: React.FC<TaskCardProps> = ({
   )
 }
 
-export default TaskCard
+export default TaskCardNew

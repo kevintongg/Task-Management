@@ -58,10 +58,18 @@ export const CATEGORY_COLORS = [
 ] as const
 
 // Helper function to handle Supabase errors consistently
-export const handleSupabaseError = (error: any, context = ''): string => {
+export const handleSupabaseError = (error: unknown, context = ''): string => {
   if (!error) return 'An unknown error occurred'
 
-  const message = error.message || error.error_description || 'An unexpected error occurred'
+  let message = 'An unexpected error occurred'
+
+  if (typeof error === 'object' && error !== null) {
+    if ('message' in error && typeof error.message === 'string') {
+      message = error.message
+    } else if ('error_description' in error && typeof error.error_description === 'string') {
+      message = error.error_description
+    }
+  }
 
   if (context) {
     console.error(`${context}:`, error)

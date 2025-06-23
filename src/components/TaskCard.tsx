@@ -63,7 +63,9 @@ const SortableTaskCard: React.FC<TaskCardProps> = props => {
 /**
  * Individual task card component with drag-and-drop support
  */
-const TaskCard: React.FC<TaskCardProps & { dragHandleProps?: any; isMobile?: boolean }> = ({
+const TaskCard: React.FC<
+  TaskCardProps & { dragHandleProps?: Record<string, unknown>; isMobile?: boolean }
+> = ({
   task,
   category,
   onUpdate,

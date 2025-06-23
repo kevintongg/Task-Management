@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Category, CategoryFormData, Task, TaskFormData, TaskStats, TaskUpdate, UseTasksReturn } from '../types'
+import type { Category, CategoryFormData, RealtimePayload, Task, TaskFormData, TaskStats, TaskUpdate, UseTasksReturn } from '../types'
 import {
-  createCategory,
-  createTask,
-  deleteCategory,
-  deleteTask,
-  fetchCategories,
-  fetchTasks,
-  reorderTasks,
-  subscribeToCategories,
-  subscribeToTasks,
-  updateTask,
+    createCategory,
+    createTask,
+    deleteCategory,
+    deleteTask,
+    fetchCategories,
+    fetchTasks,
+    reorderTasks,
+    subscribeToCategories,
+    subscribeToTasks,
+    updateTask,
 } from '../utils/tasks'
 
 /**
@@ -88,7 +88,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       } else {
         setCategories(categoriesResult.data)
       }
-    } catch (err) {
+    } catch (_err) {
       setErrorWithClear('Failed to load data')
     } finally {
       setLoading(false)
@@ -117,7 +117,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       } else if (result.data) {
         setTasks(prev => [...prev, result.data!])
       }
-    } catch (err) {
+    } catch (_err) {
       setErrorWithClear('Failed to create task')
     }
   }, [userId, setErrorWithClear])
@@ -143,7 +143,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
           task.id === taskId ? result.data! : task
         ))
       }
-    } catch (err) {
+    } catch (_err) {
       setErrorWithClear('Failed to update task')
     }
   }, [userId, setErrorWithClear])
@@ -166,7 +166,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       } else {
         setTasks(prev => prev.filter(task => task.id !== taskId))
       }
-    } catch (err) {
+    } catch (_err) {
       setErrorWithClear('Failed to delete task')
     }
   }, [userId, setErrorWithClear])
@@ -193,7 +193,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
         // Revert the optimistic update
         loadData()
       }
-    } catch (err) {
+    } catch (_err) {
       setErrorWithClear('Failed to reorder tasks')
       loadData()
     }
@@ -221,7 +221,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       } else if (result.data) {
         setCategories(prev => [...prev, result.data!])
       }
-    } catch (err) {
+    } catch (_err) {
       setErrorWithClear('Failed to create category')
     }
   }, [userId, setErrorWithClear])
@@ -250,7 +250,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
             : task
         ))
       }
-    } catch (err) {
+    } catch (_err) {
       setErrorWithClear('Failed to delete category')
     }
   }, [userId, setErrorWithClear])
@@ -262,7 +262,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
   /**
    * Handle real-time task changes
    */
-  const handleTaskChange = useCallback((payload: any) => {
+  const handleTaskChange = useCallback((payload: RealtimePayload<Task>) => {
     const { eventType, new: newRecord, old: oldRecord } = payload
 
     switch (eventType) {
@@ -292,14 +292,14 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
         break
 
       default:
-        console.log('Unknown task event type:', eventType)
+        // Unknown event type - silently ignore for forward compatibility
     }
   }, [])
 
   /**
    * Handle real-time category changes
    */
-  const handleCategoryChange = useCallback((payload: any) => {
+  const handleCategoryChange = useCallback((payload: RealtimePayload<Category>) => {
     const { eventType, new: newRecord, old: oldRecord } = payload
 
     switch (eventType) {
@@ -329,7 +329,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
         break
 
       default:
-        console.log('Unknown category event type:', eventType)
+        // Unknown event type - silently ignore for forward compatibility
     }
   }, [])
 
@@ -337,9 +337,18 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
   useEffect(() => {
     if (!userId) return
 
+    // Create wrapper functions to handle type conversion
+    const taskChangeWrapper = (payload: unknown) => {
+      handleTaskChange(payload as RealtimePayload<Task>)
+    }
+
+    const categoryChangeWrapper = (payload: unknown) => {
+      handleCategoryChange(payload as RealtimePayload<Category>)
+    }
+
     // Subscribe to changes
-    const taskSubscription = subscribeToTasks(userId, handleTaskChange)
-    const categorySubscription = subscribeToCategories(userId, handleCategoryChange)
+    const taskSubscription = subscribeToTasks(userId, taskChangeWrapper)
+    const categorySubscription = subscribeToCategories(userId, categoryChangeWrapper)
 
     // Cleanup subscriptions
     return () => {

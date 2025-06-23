@@ -24,7 +24,7 @@ export interface User {
     name?: string
     avatar_url?: string
   }
-  app_metadata?: Record<string, any>
+  app_metadata?: Record<string, unknown>
   created_at?: string
   updated_at?: string
 }
@@ -193,10 +193,20 @@ export interface UseTasksReturn {
 }
 
 // API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   message?: string
+}
+
+// Supabase realtime payload types
+export interface RealtimePayload<T = unknown> {
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE'
+  new: T
+  old: T
+  schema: string
+  table: string
+  commit_timestamp: string
 }
 
 export interface SupabaseError {
@@ -207,7 +217,7 @@ export interface SupabaseError {
 }
 
 // Utility types
-export type AsyncFunction<T extends any[] = [], R = void> = (...args: T) => Promise<R>
+export type AsyncFunction<T extends unknown[] = [], R = void> = (...args: T) => Promise<R>
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>
 

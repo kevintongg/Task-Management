@@ -140,24 +140,24 @@ const Dashboard: React.FC = () => {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
-              Welcome back, {user ? getUserDisplayName(user) : 'User'}!
-            </h1>
-            <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
-              Here's what you need to focus on today.
-            </p>
-          </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+                Welcome back, {user ? getUserDisplayName(user) : 'User'}!
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                Here's what you need to focus on today.
+              </p>
+            </div>
 
             {/* Refresh button - responsive positioning */}
             <div className="flex justify-center sm:justify-end">
-            <button
-              onClick={refreshTasks}
-              disabled={tasksLoading}
-              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-blue-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Refresh
-            </button>
+              <button
+                onClick={refreshTasks}
+                disabled={tasksLoading}
+                className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-blue-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Refresh
+              </button>
             </div>
           </div>
         </div>
@@ -246,7 +246,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                   {
                     tasks.filter(
-                      (t: any) => !t.completed && t.due_date && new Date(t.due_date) < new Date()
+                      t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
                     ).length
                   }
                 </p>
@@ -279,7 +279,7 @@ const Dashboard: React.FC = () => {
                   Low Priority
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {tasks.filter((t: any) => t.priority === 'low').length}
+                  {tasks.filter(t => t.priority === 'low').length}
                 </p>
               </div>
               <div></div>
@@ -296,7 +296,7 @@ const Dashboard: React.FC = () => {
                   Medium Priority
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {tasks.filter((t: any) => t.priority === 'medium').length}
+                  {tasks.filter(t => t.priority === 'medium').length}
                 </p>
               </div>
               <div></div>
@@ -313,7 +313,7 @@ const Dashboard: React.FC = () => {
                   High Priority
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {tasks.filter((t: any) => t.priority === 'high').length}
+                  {tasks.filter(t => t.priority === 'high').length}
                 </p>
               </div>
               <div></div>

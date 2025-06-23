@@ -186,7 +186,7 @@ export const reorderTasks = async (
     )
 
     // Check for any errors
-    const errors = results.filter((result: any) => result.error)
+    const errors = results.filter(result => result.error)
     if (errors.length > 0) {
       return { error: handleSupabaseError(errors[0].error, 'Reorder tasks') }
     }
@@ -292,7 +292,7 @@ export const deleteCategory = async (categoryId: string, userId: string): Promis
 /**
  * Subscribe to real-time task changes
  */
-export const subscribeToTasks = (userId: string, onTaskChange: (payload: any) => void) => {
+export const subscribeToTasks = (userId: string, onTaskChange: (payload: unknown) => void) => {
   return supabase
     .channel('tasks-changes')
     .on(
@@ -303,7 +303,7 @@ export const subscribeToTasks = (userId: string, onTaskChange: (payload: any) =>
         table: 'tasks',
         filter: `user_id=eq.${userId}`
       },
-      (payload: any) => {
+      (payload: unknown) => {
         onTaskChange(payload)
       }
     )
@@ -313,7 +313,7 @@ export const subscribeToTasks = (userId: string, onTaskChange: (payload: any) =>
 /**
  * Subscribe to real-time category changes
  */
-export const subscribeToCategories = (userId: string, onCategoryChange: (payload: any) => void) => {
+export const subscribeToCategories = (userId: string, onCategoryChange: (payload: unknown) => void) => {
   return supabase
     .channel('categories-changes')
     .on(
@@ -324,7 +324,7 @@ export const subscribeToCategories = (userId: string, onCategoryChange: (payload
         table: 'categories',
         filter: `user_id=eq.${userId}`
       },
-      (payload: any) => {
+      (payload: unknown) => {
         onCategoryChange(payload)
       }
     )

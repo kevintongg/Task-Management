@@ -26,7 +26,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
     // Since the theme is already applied by the blocking script,
     // we just need to read the current state
-    if (document.documentElement.classList.contains('dark')) {
+    if (typeof document !== 'undefined' && document.documentElement?.classList.contains('dark')) {
       return 'dark'
     }
     return 'light'
@@ -39,29 +39,38 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const isDark = theme === 'dark'
 
   useEffect(() => {
-    // Save to localStorage
-    localStorage.setItem('theme', theme)
+    // Save to localStorage (guard against SSR/test environments)
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('theme', theme)
+    }
 
-    // Update document class with smooth transition
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
+    // Update document class with smooth transition (guard against SSR/test environments)
+    if (typeof document !== 'undefined') {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
     }
   }, [theme])
 
   // Listen for system theme changes
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only update if user hasn't set a manual preference
-      if (!localStorage.getItem('theme')) {
-        setTheme(e.matches ? 'dark' : 'light')
+    // Guard against environments where window.matchMedia is not available (like tests)
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handleChange = (e: MediaQueryListEvent) => {
+        // Only update if user hasn't set a manual preference
+        if (!localStorage.getItem('theme')) {
+          setTheme(e.matches ? 'dark' : 'light')
+        }
       }
-    }
 
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    }
+    // Return undefined for environments where matchMedia is not available
+    return undefined
   }, [])
 
   const value: ThemeContextType = {
