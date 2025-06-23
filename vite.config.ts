@@ -6,8 +6,6 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     react({
-      // Enable Fast Refresh
-      fastRefresh: true,
       // Include .jsx files
       include: '**/*.{jsx,tsx}',
     }),
@@ -57,12 +55,14 @@ export default defineConfig({
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
           supabase: ['@supabase/supabase-js'],
-          dnd: ['react-beautiful-dnd'],
+          dnd: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
           icons: ['lucide-react'],
         },
 
         // Asset file naming
         assetFileNames: assetInfo => {
+          if (!assetInfo.name) return `assets/[name]-[hash][extname]`
+
           const info = assetInfo.name.split('.')
           const extType = info[info.length - 1]
 
@@ -121,7 +121,9 @@ export default defineConfig({
       'react-dom',
       'react-router-dom',
       '@supabase/supabase-js',
-      'react-beautiful-dnd',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@dnd-kit/utilities',
       'lucide-react',
     ],
     exclude: [

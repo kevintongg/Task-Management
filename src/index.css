@@ -416,16 +416,16 @@
   }
 }
 
-/* React Beautiful DnD specific styles */
-.react-beautiful-dnd-dragging {
+/* DND Kit specific styles */
+.dnd-kit-dragging {
   @apply shadow-lg;
 }
 
-.react-beautiful-dnd-drag-handle {
+.dnd-kit-drag-handle {
   @apply cursor-grab;
 }
 
-.react-beautiful-dnd-drag-handle:active {
+.dnd-kit-drag-handle:active {
   @apply cursor-grabbing;
 }
 

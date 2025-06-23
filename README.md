@@ -406,7 +406,7 @@ The `tailwind.config.js` includes:
 ### React & Modern JavaScript
 
 - [React Documentation](https://react.dev)
-- [React Beautiful DnD](https://github.com/atlassian/react-beautiful-dnd)
+- [DND Kit](https://github.com/clauderic/dnd-kit)
 - [Modern JavaScript Features](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
 ### Styling & UI
