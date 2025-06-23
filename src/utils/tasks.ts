@@ -1,5 +1,5 @@
-import type { Category, CategoryFormData, Task, TaskFormData, TaskUpdate } from '../types';
-import { handleSupabaseError, supabase } from './supabase';
+import type { Category, CategoryFormData, Task, TaskFormData, TaskUpdate } from '../types'
+import { handleSupabaseError, supabase } from './supabase'
 
 /**
  * Fetch all tasks for a user

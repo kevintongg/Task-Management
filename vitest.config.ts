@@ -28,39 +28,26 @@ export default defineConfig({
         'coverage/',
         '**/*.d.ts',
         'src/main.jsx',
-        'src/App.jsx'
+        'src/App.jsx',
       ],
       thresholds: {
         global: {
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
 
     // Test file patterns
-    include: [
-      'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
-      'tests/**/*.{test,spec}.{js,jsx,ts,tsx}'
-    ],
+    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}', 'tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
 
     // Exclude patterns
-    exclude: [
-      'node_modules',
-      'dist',
-      'build',
-      '.git',
-      '.cache'
-    ],
+    exclude: ['node_modules', 'dist', 'build', '.git', '.cache'],
 
     // Watch options
-    watchExclude: [
-      'node_modules/**',
-      'dist/**',
-      'build/**'
-    ],
+    watchExclude: ['node_modules/**', 'dist/**', 'build/**'],
 
     // Timeout settings
     testTimeout: 10000,
@@ -74,8 +61,8 @@ export default defineConfig({
     poolOptions: {
       threads: {
         minThreads: 1,
-        maxThreads: 4
-      }
+        maxThreads: 4,
+      },
     },
 
     // Mock configuration
@@ -84,8 +71,8 @@ export default defineConfig({
 
     // Define global variables for tests
     define: {
-      __TEST__: true
-    }
+      __TEST__: true,
+    },
   },
 
   // Resolve configuration for tests
@@ -97,7 +84,7 @@ export default defineConfig({
       '@/utils': resolve(__dirname, './src/utils'),
       '@/hooks': resolve(__dirname, './src/hooks'),
       '@/styles': resolve(__dirname, './src/styles'),
-      '@/test': resolve(__dirname, './src/test')
-    }
-  }
+      '@/test': resolve(__dirname, './src/test'),
+    },
+  },
 })
