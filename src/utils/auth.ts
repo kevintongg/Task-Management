@@ -171,7 +171,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
  * Sign in with OAuth provider (Google, GitHub, etc.)
  */
 export const signInWithOAuth = async (
-  provider: 'google' | 'github' | 'azure' | 'apple' | 'discord' | 'linkedin' | 'facebook'
+  provider: 'google' | 'github' | 'azure' | 'apple' | 'discord' | 'linkedin'
 ): Promise<{ error: string | null }> => {
   try {
           const { error } = await supabase.auth.signInWithOAuth({
@@ -199,7 +199,7 @@ export const signInWithOAuth = async (
  * Link an OAuth provider to existing account
  */
 export const linkOAuthAccount = async (
-  provider: 'google' | 'github' | 'azure' | 'apple' | 'discord' | 'linkedin' | 'facebook'
+  provider: 'google' | 'github' | 'azure' | 'apple' | 'discord' | 'linkedin'
 ): Promise<{ error: string | null }> => {
   try {
     const { error } = await supabase.auth.linkIdentity({

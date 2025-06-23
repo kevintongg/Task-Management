@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthForm from '../components/AuthForm'
+import OAuthButtons from '../components/OAuthButtons'
 import type { AuthFormData } from '../types'
 import { signUpWithEmail } from '../utils/auth'
 

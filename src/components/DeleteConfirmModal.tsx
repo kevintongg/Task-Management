@@ -35,6 +35,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
       }, 100)
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [isOpen])
 
   const handleDelete = async () => {
