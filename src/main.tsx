@@ -1,18 +1,10 @@
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { SpeedInsights } from '@vercel/speed-insights/react'
 import App from './App'
 import './index.css'
 
-// Type declaration for Vite HMR
-declare global {
-  interface ImportMeta {
-    hot?: {
-      accept(cb?: () => void): void
-      accept(dep: string, cb: () => void): void
-    }
-  }
-}
+// Vite HMR types are already declared in vite-env.d.ts
 
 // Get the root element
 const rootElement = document.getElementById('root')

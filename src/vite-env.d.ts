@@ -7,4 +7,8 @@ interface ImportMetaEnv {
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
+  readonly hot?: {
+    accept(cb?: () => void): void
+    accept(dep: string, cb: () => void): void
+  }
 }

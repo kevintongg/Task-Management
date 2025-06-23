@@ -8,18 +8,30 @@ afterEach(() => {
 })
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn(() => ({
-  observe: vi.fn(),
-  disconnect: vi.fn(),
-  unobserve: vi.fn(),
-}))
+global.IntersectionObserver = class IntersectionObserver {
+  observe = vi.fn()
+  disconnect = vi.fn()
+  unobserve = vi.fn()
+  takeRecords = vi.fn()
+  root = null
+  rootMargin = ''
+  thresholds = []
+
+  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {
+    // Mock implementation
+  }
+}
 
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn(() => ({
-  observe: vi.fn(),
-  disconnect: vi.fn(),
-  unobserve: vi.fn(),
-}))
+global.ResizeObserver = class ResizeObserver {
+  observe = vi.fn()
+  disconnect = vi.fn()
+  unobserve = vi.fn()
+
+  constructor(_callback: ResizeObserverCallback) {
+    // Mock implementation
+  }
+}
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -48,7 +60,9 @@ const localStorageMock = {
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
-}
+  length: 0,
+  key: vi.fn(),
+} as Storage
 global.localStorage = localStorageMock
 
 // Mock sessionStorage
@@ -57,7 +71,9 @@ const sessionStorageMock = {
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
-}
+  length: 0,
+  key: vi.fn(),
+} as Storage
 global.sessionStorage = sessionStorageMock
 
 // Mock URL.createObjectURL

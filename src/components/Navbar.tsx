@@ -1,6 +1,5 @@
 import { Bell, LogOut, Menu, Settings, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import type { NavbarProps } from '../types'
 import Avatar from './Avatar'
 import ThemeToggle from './ThemeToggle'
@@ -9,8 +8,6 @@ import ThemeToggle from './ThemeToggle'
  * Navigation bar component with responsive design and user menu
  */
 const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) => {
-  const navigate = useNavigate()
-
   // State for mobile menu and user dropdown
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false)
@@ -131,7 +128,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
 
                   <button
-                    onClick={onSignOut}
+                    onClick={handleSignOut}
                     className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <LogOut className="h-4 w-4 mr-3" />
@@ -226,7 +223,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
                 </button>
 
                 <button
-                  onClick={onSignOut}
+                  onClick={handleSignOut}
                   className="flex items-center w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
                 >
                   <LogOut className="h-4 w-4 mr-3" />

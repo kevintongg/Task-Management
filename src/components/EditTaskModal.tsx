@@ -229,7 +229,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               onCategoryChange={categoryId =>
                 setFormData(prev => ({
                   ...prev,
-                  category_id: categoryId === 'all' ? '' : categoryId,
+                  category_id: categoryId === 'all' || !categoryId ? '' : categoryId,
                 }))
               }
             />
