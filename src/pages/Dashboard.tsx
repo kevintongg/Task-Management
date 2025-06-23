@@ -137,26 +137,28 @@ const Dashboard: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Welcome Section */}
-        <div className="mb-6 sm:mb-8 relative">
-          <div className="text-center px-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
-              Welcome back, {user ? getUserDisplayName(user) : 'User'}!
-            </h1>
-            <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
-              Here's what you need to focus on today.
-            </p>
-          </div>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+                Welcome back, {user ? getUserDisplayName(user) : 'User'}!
+              </h1>
+              <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                Here's what you need to focus on today.
+              </p>
+            </div>
 
-          {/* Refresh button - positioned on the right on desktop, centered below on mobile */}
-          <div className="mt-4 flex justify-center sm:absolute sm:top-0 sm:right-0 sm:mt-0">
-            <button
-              onClick={refreshTasks}
-              disabled={tasksLoading}
-              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-blue-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Refresh
-            </button>
+            {/* Refresh button - responsive positioning */}
+            <div className="flex justify-center sm:justify-end">
+              <button
+                onClick={refreshTasks}
+                disabled={tasksLoading}
+                className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-blue-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
 
@@ -182,11 +184,11 @@ const Dashboard: React.FC = () => {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg mb-2 sm:mb-0">
+            <div className="grid grid-cols-3 items-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 dark:bg-blue-500 rounded"></div>
               </div>
-              <div className="sm:ml-4">
+              <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
                   Total Tasks
                 </p>
@@ -194,15 +196,16 @@ const Dashboard: React.FC = () => {
                   {taskStats.total}
                 </p>
               </div>
+              <div></div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
-              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg mb-2 sm:mb-0">
+            <div className="grid grid-cols-3 items-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                 <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-600 dark:bg-green-500 rounded"></div>
               </div>
-              <div className="sm:ml-4">
+              <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
                   Completed
                 </p>
@@ -210,15 +213,16 @@ const Dashboard: React.FC = () => {
                   {taskStats.completed}
                 </p>
               </div>
+              <div></div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
-              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg mb-2 sm:mb-0">
+            <div className="grid grid-cols-3 items-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
                 <div className="w-5 h-5 sm:w-6 sm:h-6 bg-yellow-600 dark:bg-yellow-500 rounded"></div>
               </div>
-              <div className="sm:ml-4">
+              <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
                   Pending
                 </p>
@@ -226,15 +230,16 @@ const Dashboard: React.FC = () => {
                   {taskStats.pending}
                 </p>
               </div>
+              <div></div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
-              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg mb-2 sm:mb-0">
+            <div className="grid grid-cols-3 items-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
                 <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-600 dark:bg-red-500 rounded"></div>
               </div>
-              <div className="sm:ml-4">
+              <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
                   Overdue
                 </p>
@@ -246,6 +251,72 @@ const Dashboard: React.FC = () => {
                   }
                 </p>
               </div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Priority Breakdown */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6 sm:mb-8">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Priority Distribution
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Breakdown of tasks by priority level
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <div className="w-6 h-6 bg-green-600 dark:bg-green-500 rounded flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">-</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center text-center">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                  Low Priority
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {tasks.filter((t: any) => t.priority === 'low').length}
+                </p>
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-3 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
+              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+                <div className="w-6 h-6 bg-yellow-600 dark:bg-yellow-500 rounded flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">~</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center text-center">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                  Medium Priority
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {tasks.filter((t: any) => t.priority === 'medium').length}
+                </p>
+              </div>
+              <div></div>
+            </div>
+
+            <div className="grid grid-cols-3 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                <div className="w-6 h-6 bg-red-600 dark:bg-red-500 rounded flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">!</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center text-center">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                  High Priority
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {tasks.filter((t: any) => t.priority === 'high').length}
+                </p>
+              </div>
+              <div></div>
             </div>
           </div>
         </div>

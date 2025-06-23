@@ -117,46 +117,115 @@ const TaskCard: React.FC<TaskCardProps & { dragHandleProps?: any; isMobile?: boo
   }
 
   /**
+   * Parse date string in a timezone-aware way for global collaboration
+   */
+  const parseDate = (dateString: string): Date => {
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString)
+
+    if (isDateOnly) {
+      // For date-only strings, parse as local date to maintain user intent
+      const [year, month, day] = dateString.split('-').map(Number)
+      return new Date(year, month - 1, day)
+    } else {
+      // Parse as full datetime (UTC-aware)
+      return new Date(dateString)
+    }
+  }
+
+  /**
    * Check if task is overdue
    */
   const isOverdue = (): boolean => {
     if (!task.due_date) return false
     const today = new Date()
-    const dueDate = new Date(task.due_date)
+    today.setHours(23, 59, 59, 999) // End of today in user's timezone
+    const dueDate = parseDate(task.due_date)
+    dueDate.setHours(23, 59, 59, 999) // End of due date
     return dueDate < today && !task.completed
   }
 
   /**
-   * Check if task is due soon (within 24 hours)
+   * Check if task is due soon (tomorrow in user's timezone)
    */
   const isDueSoon = (): boolean => {
     if (!task.due_date) return false
-    const now = new Date()
-    const dueDate = new Date(task.due_date)
-    const timeDiff = dueDate.getTime() - now.getTime()
-    const hoursDiff = timeDiff / (1000 * 3600)
-    return hoursDiff > 0 && hoursDiff <= 24 && !task.completed
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    const dueDate = parseDate(task.due_date)
+
+    // Normalize to compare dates only
+    const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
+    const tomorrowOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate())
+
+    return dueDateOnly.getTime() === tomorrowOnly.getTime() && !task.completed
   }
 
   /**
-   * Format due date for display
+   * Format due date for display with timezone context and collaborative clarity
    */
   const formatDueDate = (dateString: string): string => {
-    const date = new Date(dateString)
+    const date = parseDate(dateString)
     const now = new Date()
-    const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
-    if (diffDays === 0) return 'Today'
-    if (diffDays === 1) return 'Tomorrow'
-    if (diffDays === -1) return 'Yesterday'
-    if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`
-    if (diffDays < -1 && diffDays >= -7) return `${Math.abs(diffDays)} days ago`
+    // Normalize both dates to start of day for accurate comparison
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-    return date.toLocaleDateString('en-US', {
+    const diffTime = dateOnly.getTime() - nowOnly.getTime()
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+
+    // Handle timezone edge cases with more context for global collaboration
+    if (diffDays === 0) {
+      return 'Today'
+    }
+    if (diffDays === 1) {
+      return 'Tomorrow'
+    }
+    if (diffDays === -1) {
+      return 'Yesterday'
+    }
+    if (diffDays > 1 && diffDays <= 7) {
+      // Show both relative and absolute date for clarity across timezones
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
+      return `${dayName} (${diffDays} days)`
+    }
+    if (diffDays < -1 && diffDays >= -7) {
+      return `${Math.abs(diffDays)} days ago`
+    }
+
+    // For dates beyond a week, show full date with day of week for global context
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
       month: 'short',
       day: 'numeric',
       year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
-    })
+    }
+
+    return date.toLocaleDateString('en-US', options)
+  }
+
+  /**
+   * Get timezone-aware urgency level for collaborative context
+   */
+  const getTaskUrgency = (): 'overdue' | 'due-soon' | 'upcoming' | 'normal' => {
+    if (!task.due_date || task.completed) return 'normal'
+
+    const date = parseDate(task.due_date)
+    const now = new Date()
+
+    // Normalize dates for comparison
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    const diffTime = dateOnly.getTime() - nowOnly.getTime()
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays < 0) return 'overdue'
+    if (diffDays === 0 || diffDays === 1) return 'due-soon'
+    if (diffDays <= 3) return 'upcoming'
+    return 'normal'
   }
 
   /**
@@ -187,7 +256,8 @@ const TaskCard: React.FC<TaskCardProps & { dragHandleProps?: any; isMobile?: boo
    */
   const handleDeleteConfirm = async (taskId: string) => {
     await onDelete(taskId)
-    // Close edit modal if it was open
+    // Close delete modal and edit modal if they were open
+    setShowDeleteModal(false)
     setShowEditModal(false)
   }
 
@@ -264,79 +334,55 @@ const TaskCard: React.FC<TaskCardProps & { dragHandleProps?: any; isMobile?: boo
           </button>
         </div>
 
-        {/* Task Content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <div className="text-center sm:text-left">
-            {/* Task Title */}
-            <h3
-              className={`text-base sm:text-lg font-semibold text-gray-900 dark:text-white leading-tight ${
-                task.description ? 'mb-1 sm:mb-2' : 'mb-2 sm:mb-3'
-              } ${task.completed ? 'line-through text-gray-500 dark:text-gray-400' : ''}`}
-            >
-              {task.title}
-            </h3>
-
-            {/* Task Description */}
-            {task.description && (
-              <p
-                className={`text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-2 sm:mb-3 leading-relaxed ${
-                  task.completed ? 'line-through' : ''
-                }`}
-              >
-                {task.description}
-              </p>
-            )}
-
-            {/* Task Metadata */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 text-xs sm:text-sm">
-              {/* Priority Badge */}
-              <span
-                className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full border font-medium text-xs ${priorityConfig.color}`}
-              >
-                {priorityConfig.label}
-              </span>
-
-              {/* Category Badge */}
-              {category && (
-                <span
-                  className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-white font-medium flex items-center gap-1 text-xs"
-                  style={{ backgroundColor: category.color }}
-                >
-                  <Tag className="h-3 w-3" />
-                  <span className="hidden sm:inline">{category.name}</span>
-                  <span className="sm:hidden">{category.name.slice(0, 3)}</span>
-                </span>
-              )}
-
-              {/* Due Date */}
-              {task.due_date && (
-                <span
-                  className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full flex items-center gap-1 font-medium text-xs ${
-                    isOverdue()
-                      ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700'
-                      : isDueSoon()
-                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600'
-                  }`}
-                >
-                  {isOverdue() ? (
-                    <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                  ) : (
-                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                  )}
-                  <span className="hidden sm:inline">{formatDueDate(task.due_date)}</span>
-                  <span className="sm:hidden">{formatDueDate(task.due_date).split(' ')[0]}</span>
-                </span>
-              )}
-
-              {/* Created Date - Hidden on mobile */}
-              <span className="hidden sm:flex text-gray-500 dark:text-gray-400 items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {new Date(task.created_at).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
+        {/* Task Title - Centered with other elements */}
+        <div className="flex-1 min-w-0 flex items-center">
+          <h3
+            className={`text-base sm:text-lg font-semibold text-gray-900 dark:text-white leading-tight ${
+              task.completed ? 'line-through text-gray-500 dark:text-gray-400' : ''
+            }`}
+          >
+            {task.title}
+          </h3>
         </div>
+
+        {/* Priority Badge - Centered */}
+        <div className="flex-shrink-0 flex items-center">
+          <span
+            className={`px-2.5 py-1 rounded-md border font-medium text-xs ${priorityConfig.color}`}
+          >
+            {priorityConfig.label}
+          </span>
+        </div>
+
+        {/* Due Date - Centered */}
+        {task.due_date && (
+          <div className="flex-shrink-0 flex items-center">
+            <span
+              className={`px-2.5 py-1 rounded-md flex items-center gap-1 font-medium text-xs ${
+                getTaskUrgency() === 'overdue'
+                  ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700'
+                  : getTaskUrgency() === 'due-soon'
+                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700'
+                  : getTaskUrgency() === 'upcoming'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600'
+              }`}
+              title={`Due: ${parseDate(task.due_date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })} (in your timezone)`}
+            >
+              {getTaskUrgency() === 'overdue' ? (
+                <AlertCircle className="h-3 w-3" />
+              ) : (
+                <Calendar className="h-3 w-3" />
+              )}
+              <span>{formatDueDate(task.due_date)}</span>
+            </span>
+          </div>
+        )}
 
         {/* Action Menu */}
         <div className="flex-shrink-0 relative flex items-center justify-center" ref={menuRef}>
@@ -396,6 +442,43 @@ const TaskCard: React.FC<TaskCardProps & { dragHandleProps?: any; isMobile?: boo
         </div>
       </div>
 
+      {/* Task Description and Category - Below main row */}
+      {(task.description || category) && (
+        <div className="mt-2 sm:mt-3 ml-8 sm:ml-10">
+          {/* Task Description */}
+          {task.description && (
+            <p
+              className={`text-sm text-gray-600 dark:text-gray-300 mb-2 leading-relaxed ${
+                task.completed ? 'line-through' : ''
+              }`}
+            >
+              {task.description}
+            </p>
+          )}
+
+          {/* Category and Created Date */}
+          <div className="flex items-center gap-2">
+            {/* Category Badge */}
+            {category && (
+              <span
+                className="px-2.5 py-1 rounded-md text-white font-medium flex items-center gap-1 text-xs"
+                style={{ backgroundColor: category.color }}
+              >
+                <Tag className="h-3 w-3" />
+                <span className="hidden sm:inline">{category.name}</span>
+                <span className="sm:hidden">{category.name.slice(0, 3)}</span>
+              </span>
+            )}
+
+            {/* Created Date */}
+            <span className="hidden lg:flex text-gray-500 dark:text-gray-400 items-center gap-1 text-xs">
+              <Clock className="h-3 w-3" />
+              {new Date(task.created_at).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Edit Modal */}
       <EditTaskModal
         isOpen={showEditModal}
@@ -403,7 +486,10 @@ const TaskCard: React.FC<TaskCardProps & { dragHandleProps?: any; isMobile?: boo
         task={task}
         categories={[]} // Will be passed from parent
         onSave={handleEditSave}
-        onDelete={handleDeleteConfirm}
+        onDelete={() => {
+          setShowEditModal(false)
+          setShowDeleteModal(true)
+        }}
       />
 
       {/* Delete Confirmation Modal */}

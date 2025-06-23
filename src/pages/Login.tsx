@@ -1,28 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthForm from '../components/AuthForm'
 import type { AuthFormData } from '../types'
-import { getCurrentUser, signInWithEmail } from '../utils/auth'
+import { signInWithEmail } from '../utils/auth'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Check if user is already authenticated
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { user } = await getCurrentUser()
-      if (user) {
-        navigate('/dashboard')
-      } else {
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
-  }, [navigate])
 
   const handleSubmit = async (data: AuthFormData) => {
     setAuthLoading(true)
@@ -40,14 +25,6 @@ const Login: React.FC = () => {
     } finally {
       setAuthLoading(false)
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    )
   }
 
   return (

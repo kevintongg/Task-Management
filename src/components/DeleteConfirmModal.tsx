@@ -93,11 +93,11 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
     >
       <div className="space-y-6">
         {/* Warning Icon and Message */}
-        <div className="flex items-start space-x-3">
+        <div className="flex flex-col items-center text-center space-y-4">
           <div className="flex-shrink-0">
             <AlertTriangle className="h-6 w-6 text-red-500" />
           </div>
-          <div className="flex-1">
+          <div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
               Are you sure you want to delete this task?
             </h3>

@@ -10,7 +10,7 @@ interface EditTaskModalProps {
   task: Task | null
   categories: Category[]
   onSave: (taskId: string, updates: TaskUpdate) => Promise<void>
-  onDelete?: (taskId: string) => Promise<void>
+  onDelete?: ((taskId: string) => Promise<void>) | (() => void)
 }
 
 const EditTaskModal: React.FC<EditTaskModalProps> = ({
@@ -102,9 +102,16 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const handleDelete = async () => {
     if (!task || !onDelete) return
 
+    // Check if onDelete expects a taskId parameter or is a simple callback
+    if (onDelete.length === 0) {
+      // Simple callback - doesn't need taskId and doesn't return Promise
+      ;(onDelete as () => void)()
+      return
+    }
+
     setIsDeleting(true)
     try {
-      await onDelete(task.id)
+      await (onDelete as (taskId: string) => Promise<void>)(task.id)
       onClose()
     } catch (error) {
       console.error('Failed to delete task:', error)
@@ -242,7 +249,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             Due Date
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
             <input
               type="date"
               value={formData.due_date}
@@ -253,6 +260,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                   : 'border-gray-300 dark:border-gray-600'
               }`}
               disabled={isLoading || isDeleting}
+              style={{
+                position: 'relative',
+                zIndex: 'auto',
+              }}
             />
           </div>
           {errors.due_date && (

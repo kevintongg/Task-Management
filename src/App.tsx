@@ -8,7 +8,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import type { User } from './types'
-import { getCurrentUser } from './utils/auth'
+import { onAuthStateChange } from './utils/auth'
 
 // Types for our components
 interface ProtectedRouteProps {
@@ -28,26 +28,49 @@ interface ErrorBoundaryState {
   error?: Error
 }
 
-// Protected Route Component - only accessible when authenticated
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+// Auth Context to manage authentication state globally
+interface AuthContextType {
+  user: User | null
+  loading: boolean
+}
+
+const AuthContext = React.createContext<AuthContextType>({
+  user: null,
+  loading: true,
+})
+
+// Auth Provider Component
+const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { user } = await getCurrentUser()
-        setUser(user)
-      } catch (error) {
-        console.error('Auth check failed:', error)
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
-    }
+    // Listen to auth state changes
+    const {
+      data: { subscription },
+    } = onAuthStateChange((_event, user) => {
+      setUser(user)
+      setLoading(false)
+    })
 
-    checkAuth()
+    return () => subscription.unsubscribe()
   }, [])
+
+  return <AuthContext.Provider value={{ user, loading }}>{children}</AuthContext.Provider>
+}
+
+// Custom hook to use auth context
+const useAuth = () => {
+  const context = React.useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
+
+// Protected Route Component - only accessible when authenticated
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
@@ -62,24 +85,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
 // Public Route Component - only accessible when not authenticated
 const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
-  const [user, setUser] = React.useState<User | null>(null)
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { user } = await getCurrentUser()
-        setUser(user)
-      } catch (error) {
-        console.error('Auth check failed:', error)
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
-  }, [])
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
@@ -169,55 +175,57 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <ErrorBoundary>
-        <Router
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <div className="App">
-            <Routes>
-              {/* Public routes */}
-              <Route
-                path="/"
-                element={
-                  <PublicRoute>
-                    <Home />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/signup"
-                element={
-                  <PublicRoute>
-                    <Signup />
-                  </PublicRoute>
-                }
-              />
+        <AuthProvider>
+          <Router
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <div className="App">
+              <Routes>
+                {/* Public routes */}
+                <Route
+                  path="/"
+                  element={
+                    <PublicRoute>
+                      <Home />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/login"
+                  element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  }
+                />
 
-              {/* Protected routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Catch all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-        </Router>
+                {/* Catch all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </Router>
+        </AuthProvider>
       </ErrorBoundary>
     </ThemeProvider>
   )
