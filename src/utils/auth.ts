@@ -1,6 +1,6 @@
-import type { AuthChangeEvent } from '@supabase/supabase-js';
-import type { AuthFormData, User } from '../types';
-import { handleSupabaseError, supabase } from './supabase';
+import type { AuthChangeEvent } from '@supabase/supabase-js'
+import type { AuthFormData, User } from '../types'
+import { handleSupabaseError, supabase } from './supabase'
 
 /**
  * Sign up a new user with email and password
@@ -174,16 +174,16 @@ export const signInWithOAuth = async (
   provider: 'google' | 'github' | 'azure' | 'apple' | 'discord' | 'linkedin'
 ): Promise<{ error: string | null }> => {
   try {
-          const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
         },
-      })
+      },
+    })
 
     if (error) {
       return { error: handleSupabaseError(error, `OAuth ${provider} sign in`) }
