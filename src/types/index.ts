@@ -137,6 +137,7 @@ export interface AuthFormData {
 export interface TaskCardProps {
   task: Task
   category?: Category
+  categories?: Category[]
   onUpdate: (taskId: string, updates: TaskUpdate) => Promise<void>
   onDelete: (taskId: string) => Promise<void>
   isDragging?: boolean

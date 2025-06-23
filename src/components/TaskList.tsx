@@ -1,9 +1,23 @@
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 import { AlertCircle, Calendar, Plus, Search } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd'
 import type { Category, Task, TaskFormData, TaskListProps } from '../types'
 import CategoryFilter from './CategoryFilter'
-import TaskCard from './TaskCard'
+import SortableTaskCard from './TaskCard'
 
 const TaskList: React.FC<TaskListProps> = ({
   tasks = [],
@@ -55,19 +69,39 @@ const TaskList: React.FC<TaskListProps> = ({
       }
     })
 
+  // Configure drag sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
   // Handle drag end
   const handleDragEnd = useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return
+    (event: DragEndEvent) => {
+      const { active, over } = event
 
-      const sourceIndex = result.source.index
-      const destinationIndex = result.destination.index
+      if (!over) return
 
-      if (sourceIndex === destinationIndex) return
+      const activeIndex = filteredTasks.findIndex(task => task.id === active.id)
+      const overIndex = filteredTasks.findIndex(task => task.id === over.id)
 
-      onReorderTasks?.(sourceIndex, destinationIndex)
+      if (activeIndex !== overIndex) {
+        onReorderTasks?.(activeIndex, overIndex)
+      }
     },
-    [onReorderTasks]
+    [filteredTasks, onReorderTasks]
   )
 
   // Handle create new task
@@ -125,73 +159,86 @@ const TaskList: React.FC<TaskListProps> = ({
   return (
     <div className="space-y-6">
       {/* Header with stats */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 lg:p-8">
+        <div className="relative mb-8">
+          <div className="text-center">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              Tasks
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
               Manage and organize your tasks efficiently
             </p>
           </div>
 
-          <button
-            onClick={handleCreateTask}
-            disabled={isCreating || loading}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {isCreating ? 'Creating...' : 'New Task'}
-          </button>
+          {/* New Task button - positioned on the right on desktop, centered below on mobile */}
+          <div className="mt-4 flex justify-center sm:absolute sm:top-0 sm:right-0 sm:mt-0">
+            <button
+              onClick={handleCreateTask}
+              disabled={isCreating || loading}
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              {isCreating ? 'Creating...' : 'New Task'}
+            </button>
+          </div>
         </div>
 
         {/* Task Statistics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:p-6 text-center border border-gray-100 dark:border-gray-600">
+            <div className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-1">
               {taskStats.total}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
+            <div className="text-sm lg:text-base font-medium text-gray-600 dark:text-gray-400">
+              Total
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 lg:p-6 text-center border border-green-100 dark:border-green-800">
+            <div className="text-3xl lg:text-4xl font-bold text-green-600 dark:text-green-400 mb-1">
               {taskStats.completed}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
+            <div className="text-sm lg:text-base font-medium text-green-700 dark:text-green-300">
+              Completed
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 lg:p-6 text-center border border-blue-100 dark:border-blue-800">
+            <div className="text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">
               {taskStats.pending}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Pending</div>
+            <div className="text-sm lg:text-base font-medium text-blue-700 dark:text-blue-300">
+              Pending
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+          <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 lg:p-6 text-center border border-red-100 dark:border-red-800">
+            <div className="text-3xl lg:text-4xl font-bold text-red-600 dark:text-red-400 mb-1">
               {taskStats.overdue}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Overdue</div>
+            <div className="text-sm lg:text-base font-medium text-red-700 dark:text-red-300">
+              Overdue
+            </div>
           </div>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex flex-col lg:flex-row gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4 lg:gap-6 max-w-6xl mx-auto">
           {/* Search */}
-          <div className="flex-1">
+          <div className="flex-1 lg:max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Search tasks..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className="w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
               />
             </div>
           </div>
 
           {/* Category Filter */}
-          <div className="sm:w-48">
+          <div className="lg:w-48">
             <CategoryFilter
               categories={categories}
               selectedCategory={selectedCategory}
@@ -200,11 +247,11 @@ const TaskList: React.FC<TaskListProps> = ({
           </div>
 
           {/* Sort */}
-          <div className="sm:w-40">
+          <div className="lg:w-44">
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
             >
               <option value="created_at">Latest</option>
               <option value="title">Title</option>
@@ -214,29 +261,31 @@ const TaskList: React.FC<TaskListProps> = ({
           </div>
 
           {/* Show Completed Toggle */}
-          <div className="flex items-center">
-            <label className="flex items-center">
+          <div className="flex items-center lg:ml-2">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={showCompleted}
                 onChange={e => setShowCompleted(e.target.checked)}
-                className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
+                className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700 w-4 h-4"
               />
-              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Show completed</span>
+              <span className="ml-3 text-base font-medium text-gray-700 dark:text-gray-300">
+                Show completed
+              </span>
             </label>
           </div>
         </div>
       </div>
 
       {/* Tasks List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 max-w-6xl mx-auto mb-8">
         {loading ? (
-          <div className="flex items-center justify-center p-8">
+          <div className="flex items-center justify-center p-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="ml-3 text-gray-600 dark:text-gray-300">Loading tasks...</span>
           </div>
         ) : filteredTasks.length === 0 ? (
-          <div className="text-center p-8">
+          <div className="text-center p-12">
             <Calendar className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No tasks found
@@ -258,41 +307,34 @@ const TaskList: React.FC<TaskListProps> = ({
             )}
           </div>
         ) : (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="tasks">
-              {provided => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="divide-y divide-gray-200 dark:divide-gray-700"
-                >
-                  {filteredTasks.map((task: Task, index: number) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`${
-                            snapshot.isDragging ? 'bg-blue-50 dark:bg-blue-900/20 shadow-lg' : ''
-                          } transition-colors`}
-                        >
-                          <TaskCard
-                            task={task}
-                            category={categories.find((c: Category) => c.id === task.category_id)}
-                            onUpdate={onUpdateTask}
-                            onDelete={onDeleteTask}
-                            isDragging={snapshot.isDragging}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={filteredTasks.map(task => task.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-1">
+                {filteredTasks.map((task: Task, index: number) => (
+                  <div key={task.id} className="group">
+                    <SortableTaskCard
+                      task={task}
+                      category={categories.find((c: Category) => c.id === task.category_id)}
+                      onUpdate={onUpdateTask}
+                      onDelete={onDeleteTask}
+                      isDragging={false}
+                      categories={categories}
+                    />
+                    {index < filteredTasks.length - 1 && (
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-600 to-transparent mx-4 my-1 opacity-60" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
     </div>

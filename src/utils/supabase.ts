@@ -73,8 +73,8 @@ export const handleSupabaseError = (error: any, context = ''): string => {
 }
 
 // Helper function to get the current user ID safely
-export const getCurrentUserId = () => {
-  const { data: { user } } = supabase.auth.getUser()
+export const getCurrentUserId = async (): Promise<string | null> => {
+  const { data: { user } } = await supabase.auth.getUser()
   return user?.id || null
 }
 

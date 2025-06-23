@@ -4,7 +4,45 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>Task Management App</title>
+
+    <!-- Theme Script - Must run before any content renders -->
+    <script>
+      ;(function () {
+        // Temporarily disable transitions to prevent flash
+        document.documentElement.style.setProperty('transition', 'none', 'important')
+
+        // Get theme from localStorage or system preference
+        function getInitialTheme() {
+          const savedTheme = localStorage.getItem('theme')
+          if (savedTheme) {
+            return savedTheme
+          }
+
+          // Check system preference
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark'
+          }
+
+          return 'light'
+        }
+
+        // Apply theme immediately
+        const theme = getInitialTheme()
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+
+        // Re-enable transitions after a brief delay
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            document.documentElement.style.removeProperty('transition')
+          })
+        })
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

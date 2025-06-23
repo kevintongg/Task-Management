@@ -33,8 +33,12 @@
 
 /* Base styles */
 @layer base {
+  /* Theme transition - prevent flash of unstyled content */
   html {
     scroll-behavior: smooth;
+    transition-property: background-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   body {
@@ -45,6 +49,14 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition-property: background-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Prevent transition during initial load */
+  .no-transition * {
+    transition: none !important;
   }
 
   /* Focus styles */

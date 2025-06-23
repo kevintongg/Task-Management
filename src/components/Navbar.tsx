@@ -1,7 +1,8 @@
-import { Bell, CheckSquare, LogOut, Menu, Plus, Settings, User, X } from 'lucide-react'
+import { Bell, LogOut, Menu, Settings, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { NavbarProps, User as UserType } from '../types'
+import type { NavbarProps } from '../types'
+import Avatar from './Avatar'
 import ThemeToggle from './ThemeToggle'
 
 /**
@@ -41,93 +42,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
   const handleSignOut = async () => {
     setIsUserMenuOpen(false)
     setIsMobileMenuOpen(false)
-
-    if (onSignOut) {
-      await onSignOut()
-    }
-
-    navigate('/login')
-  }
-
-  /**
-   * Navigation links for authenticated users
-   */
-  const navLinks = user
-    ? [
-        { to: '/dashboard', label: 'Dashboard', icon: CheckSquare },
-        { to: '/dashboard?action=create', label: 'New Task', icon: Plus },
-      ]
-    : []
-
-  /**
-   * User menu items
-   */
-  const userMenuItems = [
-    {
-      label: 'Profile',
-      icon: User,
-      onClick: () => {
-        setIsUserMenuOpen(false)
-        navigate('/profile')
-      },
-    },
-    {
-      label: 'Settings',
-      icon: Settings,
-      onClick: () => {
-        setIsUserMenuOpen(false)
-        navigate('/settings')
-      },
-    },
-    {
-      label: 'Sign Out',
-      icon: LogOut,
-      onClick: handleSignOut,
-      className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-    },
-  ]
-
-  /**
-   * Get user initials for avatar
-   */
-  const getUserInitials = (user: UserType | null): string => {
-    if (!user) return '??'
-
-    const name = user.user_metadata?.name || user.email || 'User'
-    return name
-      .split(' ')
-      .map((word: string) => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
-
-  /**
-   * Render notification badge
-   */
-  const renderNotificationBadge = () => {
-    if (!taskStats || !user) return null
-
-    const overdueTasks = taskStats.overdue || 0
-    const urgentTasks = taskStats.urgent || 0
-    const notificationCount = overdueTasks + urgentTasks
-
-    if (notificationCount === 0) return null
-
-    return (
-      <button
-        className={`
-          relative p-2 text-secondary-600 hover:text-secondary-800
-          hover:bg-secondary-100 rounded-lg transition-colors duration-200
-        `}
-        title={`${notificationCount} notifications`}
-      >
-        <Bell className="h-5 w-5" />
-        <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-          {notificationCount > 9 ? '9+' : notificationCount}
-        </span>
-      </button>
-    )
+    onSignOut()
   }
 
   return (
@@ -180,11 +95,13 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
               >
-                <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
-                    {getUserInitials(user)}
-                  </span>
-                </div>
+                <Avatar
+                  email={user?.email}
+                  name={
+                    user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')
+                  }
+                  size="sm"
+                />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   {user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')}
                 </span>
@@ -230,8 +147,9 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
             <ThemeToggle />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+              className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200"
             >
+              <span className="sr-only">{isMobileMenuOpen ? 'Close menu' : 'Open menu'}</span>
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
@@ -241,52 +159,61 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <div
+            className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg animate-in slide-in-from-top-2 duration-200"
+            ref={mobileMenuRef}
+          >
+            {/* Mobile User Info */}
+            <div className="px-3 py-4 text-center">
+              <div className="flex flex-col items-center space-y-3 mb-4">
+                <Avatar
+                  email={user?.email}
+                  name={
+                    user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')
+                  }
+                  size="lg"
+                />
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
+                </div>
+              </div>
+            </div>
+
             {/* Mobile Stats */}
             {taskStats && (
-              <div className="px-3 py-2">
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <div className="px-3 py-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg mx-3 mb-4">
+                <div className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                   Quick Stats
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="text-center">
+                  <div className="text-center p-2 bg-white dark:bg-gray-700 rounded-lg">
                     <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                       {taskStats.total}
                     </div>
-                    <div className="text-gray-600 dark:text-gray-400">Total</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Total</div>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center p-2 bg-white dark:bg-gray-700 rounded-lg">
                     <div className="text-lg font-semibold text-green-600 dark:text-green-400">
                       {taskStats.completed}
                     </div>
-                    <div className="text-gray-600 dark:text-gray-400">Done</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Done</div>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center p-2 bg-white dark:bg-gray-700 rounded-lg">
                     <div className="text-lg font-semibold text-yellow-600 dark:text-yellow-400">
                       {taskStats.pending}
                     </div>
-                    <div className="text-gray-600 dark:text-gray-400">Pending</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Pending</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Mobile User Info */}
+            {/* Mobile Menu Actions */}
             <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
-                    {getUserInitials(user)}
-                  </span>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')}
-                  </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</div>
-                </div>
-              </div>
-
               <div className="space-y-1">
                 <button className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
                   <User className="h-4 w-4 mr-3" />

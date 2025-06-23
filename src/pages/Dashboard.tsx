@@ -135,29 +135,28 @@ const Dashboard: React.FC = () => {
       <Navbar user={user} onSignOut={handleSignOut} taskStats={taskStats} />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Welcome back, {user ? getUserDisplayName(user) : 'User'}!
-              </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-300">
-                Here's what you need to focus on today.
-              </p>
-            </div>
+        <div className="mb-6 sm:mb-8 relative">
+          <div className="text-center px-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+              Welcome back, {user ? getUserDisplayName(user) : 'User'}!
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
+              Here's what you need to focus on today.
+            </p>
+          </div>
 
-            <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-              <button
-                onClick={refreshTasks}
-                disabled={tasksLoading}
-                className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors"
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Refresh
-              </button>
-            </div>
+          {/* Refresh button - positioned on the right on desktop, centered below on mobile */}
+          <div className="mt-4 flex justify-center sm:absolute sm:top-0 sm:right-0 sm:mt-0">
+            <button
+              onClick={refreshTasks}
+              disabled={tasksLoading}
+              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-blue-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Refresh
+            </button>
           </div>
         </div>
 
@@ -181,57 +180,65 @@ const Dashboard: React.FC = () => {
         )}
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <div className="w-6 h-6 bg-blue-600 dark:bg-blue-500 rounded"></div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg mb-2 sm:mb-0">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 dark:bg-blue-500 rounded"></div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Tasks</p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <div className="sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Total Tasks
+                </p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                   {taskStats.total}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                <div className="w-6 h-6 bg-green-600 dark:bg-green-500 rounded"></div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg mb-2 sm:mb-0">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-600 dark:bg-green-500 rounded"></div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Completed</p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <div className="sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Completed
+                </p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                   {taskStats.completed}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                <div className="w-6 h-6 bg-yellow-600 dark:bg-yellow-500 rounded"></div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg mb-2 sm:mb-0">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-yellow-600 dark:bg-yellow-500 rounded"></div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending</p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <div className="sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Pending
+                </p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                   {taskStats.pending}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                <div className="w-6 h-6 bg-red-600 dark:bg-red-500 rounded"></div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg mb-2 sm:mb-0">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-600 dark:bg-red-500 rounded"></div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Overdue</p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <div className="sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Overdue
+                </p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                   {
                     tasks.filter(
                       (t: any) => !t.completed && t.due_date && new Date(t.due_date) < new Date()
@@ -244,7 +251,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Category filter */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-4 sm:mb-6 p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
           <CategoryFilter
             categories={categories}
             selectedCategory={selectedCategory}
