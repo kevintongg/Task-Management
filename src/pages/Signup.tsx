@@ -24,7 +24,7 @@ const Signup: React.FC = () => {
       } else {
         navigate('/dashboard')
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setAuthLoading(false)

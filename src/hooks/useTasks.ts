@@ -1,16 +1,25 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Category, CategoryFormData, RealtimePayload, Task, TaskFormData, TaskStats, TaskUpdate, UseTasksReturn } from '../types'
+import type {
+  Category,
+  CategoryFormData,
+  RealtimePayload,
+  Task,
+  TaskFormData,
+  TaskStats,
+  TaskUpdate,
+  UseTasksReturn,
+} from '../types'
 import {
-    createCategory,
-    createTask,
-    deleteCategory,
-    deleteTask,
-    fetchCategories,
-    fetchTasks,
-    reorderTasks,
-    subscribeToCategories,
-    subscribeToTasks,
-    updateTask,
+  createCategory,
+  createTask,
+  deleteCategory,
+  deleteTask,
+  fetchCategories,
+  fetchTasks,
+  reorderTasks,
+  subscribeToCategories,
+  subscribeToTasks,
+  updateTask,
 } from '../utils/tasks'
 
 /**
@@ -28,17 +37,21 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
     total: tasks.length,
     completed: tasks.filter(t => t.completed).length,
     pending: tasks.filter(t => !t.completed).length,
-    overdue: tasks.filter(t => !t.completed && t.due_date && new Date(t.due_date) < new Date()).length,
+    overdue: tasks.filter(t => !t.completed && t.due_date && new Date(t.due_date) < new Date())
+      .length,
     urgent: tasks.filter(t => !t.completed && t.priority === 'high').length,
     byPriority: {
       low: tasks.filter(t => t.priority === 'low').length,
       medium: tasks.filter(t => t.priority === 'medium').length,
       high: tasks.filter(t => t.priority === 'high').length,
     },
-    byCategory: categories.reduce((acc, category) => {
-      acc[category.id] = tasks.filter(t => t.category_id === category.id).length
-      return acc
-    }, {} as Record<string, number>)
+    byCategory: categories.reduce(
+      (acc, category) => {
+        acc[category.id] = tasks.filter(t => t.category_id === category.id).length
+        return acc
+      },
+      {} as Record<string, number>
+    ),
   }
 
   // Clear error after a delay
@@ -47,10 +60,13 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
   }, [])
 
   // Set error with auto-clear
-  const setErrorWithClear = useCallback((errorMessage: string) => {
-    setError(errorMessage)
-    clearError()
-  }, [clearError])
+  const setErrorWithClear = useCallback(
+    (errorMessage: string) => {
+      setError(errorMessage)
+      clearError()
+    },
+    [clearError]
+  )
 
   // ============================================================================
   // DATA FETCHING
@@ -67,14 +83,14 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       return
     }
 
-      setLoading(true)
-      setError(null)
+    setLoading(true)
+    setError(null)
 
     try {
       // Fetch tasks and categories in parallel
       const [tasksResult, categoriesResult] = await Promise.all([
         fetchTasks(userId),
-        fetchCategories(userId)
+        fetchCategories(userId),
       ])
 
       if (tasksResult.error) {
@@ -88,7 +104,7 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       } else {
         setCategories(categoriesResult.data)
       }
-    } catch (_err) {
+    } catch {
       setErrorWithClear('Failed to load data')
     } finally {
       setLoading(false)
@@ -104,23 +120,26 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
    * @param {Object} taskData - Task data to create
    * @returns {Promise<boolean>} Success status
    */
-  const addTask = useCallback(async (taskData: TaskFormData) => {
-    if (!userId) {
-      setErrorWithClear('User not authenticated')
-      return
-    }
-
-    try {
-      const result = await createTask(taskData, userId)
-      if (result.error) {
-        setErrorWithClear(result.error)
-      } else if (result.data) {
-        setTasks(prev => [...prev, result.data!])
+  const addTask = useCallback(
+    async (taskData: TaskFormData) => {
+      if (!userId) {
+        setErrorWithClear('User not authenticated')
+        return
       }
-    } catch (_err) {
-      setErrorWithClear('Failed to create task')
-    }
-  }, [userId, setErrorWithClear])
+
+      try {
+        const result = await createTask(taskData, userId)
+        if (result.error) {
+          setErrorWithClear(result.error)
+        } else if (result.data) {
+          setTasks(prev => [...prev, result.data!])
+        }
+      } catch {
+        setErrorWithClear('Failed to create task')
+      }
+    },
+    [userId, setErrorWithClear]
+  )
 
   /**
    * Update an existing task
@@ -128,76 +147,83 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
    * @param {Object} updates - Fields to update
    * @returns {Promise<boolean>} Success status
    */
-  const editTask = useCallback(async (taskId: string, updates: TaskUpdate) => {
-    if (!userId) {
-      setErrorWithClear('User not authenticated')
-      return
-    }
-
-    try {
-      const result = await updateTask(taskId, updates, userId)
-      if (result.error) {
-        setErrorWithClear(result.error)
-      } else if (result.data) {
-        setTasks(prev => prev.map(task =>
-          task.id === taskId ? result.data! : task
-        ))
+  const editTask = useCallback(
+    async (taskId: string, updates: TaskUpdate) => {
+      if (!userId) {
+        setErrorWithClear('User not authenticated')
+        return
       }
-    } catch (_err) {
-      setErrorWithClear('Failed to update task')
-    }
-  }, [userId, setErrorWithClear])
+
+      try {
+        const result = await updateTask(taskId, updates, userId)
+        if (result.error) {
+          setErrorWithClear(result.error)
+        } else if (result.data) {
+          setTasks(prev => prev.map(task => (task.id === taskId ? result.data! : task)))
+        }
+      } catch {
+        setErrorWithClear('Failed to update task')
+      }
+    },
+    [userId, setErrorWithClear]
+  )
 
   /**
    * Remove a task
    * @param {string} taskId - Task ID to delete
    * @returns {Promise<boolean>} Success status
    */
-  const removeTask = useCallback(async (taskId: string) => {
-    if (!userId) {
-      setErrorWithClear('User not authenticated')
-      return
-    }
-
-    try {
-      const result = await deleteTask(taskId, userId)
-      if (result.error) {
-        setErrorWithClear(result.error)
-      } else {
-        setTasks(prev => prev.filter(task => task.id !== taskId))
+  const removeTask = useCallback(
+    async (taskId: string) => {
+      if (!userId) {
+        setErrorWithClear('User not authenticated')
+        return
       }
-    } catch (_err) {
-      setErrorWithClear('Failed to delete task')
-    }
-  }, [userId, setErrorWithClear])
 
-  const reorderTasksList = useCallback(async (sourceIndex: number, destinationIndex: number) => {
-    if (!userId) {
-      setErrorWithClear('User not authenticated')
-      return
-    }
+      try {
+        const result = await deleteTask(taskId, userId)
+        if (result.error) {
+          setErrorWithClear(result.error)
+        } else {
+          setTasks(prev => prev.filter(task => task.id !== taskId))
+        }
+      } catch {
+        setErrorWithClear('Failed to delete task')
+      }
+    },
+    [userId, setErrorWithClear]
+  )
 
-    try {
-      // Optimistically update the UI
-      const newTasks = [...tasks]
-      const [removed] = newTasks.splice(sourceIndex, 1)
-      newTasks.splice(destinationIndex, 0, removed)
-      setTasks(newTasks)
+  const reorderTasksList = useCallback(
+    async (sourceIndex: number, destinationIndex: number) => {
+      if (!userId) {
+        setErrorWithClear('User not authenticated')
+        return
+      }
 
-      // Update the server
-      const taskIds = newTasks.map(task => task.id)
-      const result = await reorderTasks(taskIds, userId)
+      try {
+        // Optimistically update the UI
+        const newTasks = [...tasks]
+        const [removed] = newTasks.splice(sourceIndex, 1)
+        newTasks.splice(destinationIndex, 0, removed)
+        setTasks(newTasks)
 
-      if (result.error) {
-        setErrorWithClear(result.error)
-        // Revert the optimistic update
+        // Update the server
+        const taskIds = newTasks.map(task => task.id)
+        const result = await reorderTasks(taskIds, userId)
+
+        if (result.error) {
+          setErrorWithClear(result.error)
+          // Revert the optimistic update
+          loadData()
+        }
+      } catch {
+        setErrorWithClear('Failed to reorder tasks')
         loadData()
       }
-    } catch (_err) {
-      setErrorWithClear('Failed to reorder tasks')
-      loadData()
-    }
-  }, [userId, tasks, setErrorWithClear, loadData])
+    },
+    [userId, tasks, setErrorWithClear, loadData]
+  )
 
   // ============================================================================
   // CATEGORY OPERATIONS
@@ -208,52 +234,58 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
    * @param {Object} categoryData - Category data to create
    * @returns {Promise<boolean>} Success status
    */
-  const addCategory = useCallback(async (categoryData: CategoryFormData) => {
-    if (!userId) {
-      setErrorWithClear('User not authenticated')
-      return
-    }
-
-    try {
-      const result = await createCategory(categoryData, userId)
-      if (result.error) {
-        setErrorWithClear(result.error)
-      } else if (result.data) {
-        setCategories(prev => [...prev, result.data!])
+  const addCategory = useCallback(
+    async (categoryData: CategoryFormData) => {
+      if (!userId) {
+        setErrorWithClear('User not authenticated')
+        return
       }
-    } catch (_err) {
-      setErrorWithClear('Failed to create category')
-    }
-  }, [userId, setErrorWithClear])
+
+      try {
+        const result = await createCategory(categoryData, userId)
+        if (result.error) {
+          setErrorWithClear(result.error)
+        } else if (result.data) {
+          setCategories(prev => [...prev, result.data!])
+        }
+      } catch {
+        setErrorWithClear('Failed to create category')
+      }
+    },
+    [userId, setErrorWithClear]
+  )
 
   /**
    * Remove a category
    * @param {string} categoryId - Category ID to delete
    * @returns {Promise<boolean>} Success status
    */
-  const removeCategory = useCallback(async (categoryId: string) => {
-    if (!userId) {
-      setErrorWithClear('User not authenticated')
-      return
-    }
-
-    try {
-      const result = await deleteCategory(categoryId, userId)
-      if (result.error) {
-        setErrorWithClear(result.error)
-      } else {
-        setCategories(prev => prev.filter(category => category.id !== categoryId))
-        // Also update tasks that had this category
-        setTasks(prev => prev.map(task =>
-          task.category_id === categoryId
-            ? { ...task, category_id: undefined }
-            : task
-        ))
+  const removeCategory = useCallback(
+    async (categoryId: string) => {
+      if (!userId) {
+        setErrorWithClear('User not authenticated')
+        return
       }
-    } catch (_err) {
-      setErrorWithClear('Failed to delete category')
-    }
-  }, [userId, setErrorWithClear])
+
+      try {
+        const result = await deleteCategory(categoryId, userId)
+        if (result.error) {
+          setErrorWithClear(result.error)
+        } else {
+          setCategories(prev => prev.filter(category => category.id !== categoryId))
+          // Also update tasks that had this category
+          setTasks(prev =>
+            prev.map(task =>
+              task.category_id === categoryId ? { ...task, category_id: undefined } : task
+            )
+          )
+        }
+      } catch {
+        setErrorWithClear('Failed to delete category')
+      }
+    },
+    [userId, setErrorWithClear]
+  )
 
   // ============================================================================
   // REAL-TIME SUBSCRIPTIONS
@@ -278,21 +310,19 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       case 'UPDATE':
         // Update existing task
         setTasks(prev =>
-          prev.map(task =>
-            task.id === newRecord.id ? { ...task, ...newRecord } : task
-          ).sort((a, b) => a.order_index - b.order_index)
+          prev
+            .map(task => (task.id === newRecord.id ? { ...task, ...newRecord } : task))
+            .sort((a, b) => a.order_index - b.order_index)
         )
         break
 
       case 'DELETE':
         // Remove deleted task
-        setTasks(prev =>
-          prev.filter(task => task.id !== oldRecord.id)
-        )
+        setTasks(prev => prev.filter(task => task.id !== oldRecord.id))
         break
 
       default:
-        // Unknown event type - silently ignore for forward compatibility
+      // Unknown event type - silently ignore for forward compatibility
     }
   }, [])
 
@@ -315,21 +345,21 @@ export const useTasks = (userId: string | null): UseTasksReturn => {
       case 'UPDATE':
         // Update existing category
         setCategories(prev =>
-          prev.map(category =>
-            category.id === newRecord.id ? { ...category, ...newRecord } : category
-          ).sort((a, b) => a.name.localeCompare(b.name))
+          prev
+            .map(category =>
+              category.id === newRecord.id ? { ...category, ...newRecord } : category
+            )
+            .sort((a, b) => a.name.localeCompare(b.name))
         )
         break
 
       case 'DELETE':
         // Remove deleted category
-        setCategories(prev =>
-          prev.filter(category => category.id !== oldRecord.id)
-        )
+        setCategories(prev => prev.filter(category => category.id !== oldRecord.id))
         break
 
       default:
-        // Unknown event type - silently ignore for forward compatibility
+      // Unknown event type - silently ignore for forward compatibility
     }
   }, [])
 

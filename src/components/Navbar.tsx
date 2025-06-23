@@ -95,12 +95,14 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
                 <Avatar
                   email={user?.email}
                   name={
-                    user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')
+                    user?.user_metadata?.name ||
+                    (user?.email ? (user.email.split('@').at(0) ?? 'User') : 'User')
                   }
                   size="sm"
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')}
+                  {user?.user_metadata?.name ||
+                    (user?.email ? (user.email.split('@').at(0) ?? 'User') : 'User')}
                 </span>
               </button>
 
@@ -110,7 +112,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700">
                     <div className="font-medium">
                       {user?.user_metadata?.name ||
-                        (user?.email ? user.email.split('@')[0] : 'User')}
+                        (user?.email ? (user.email.split('@').at(0) ?? 'User') : 'User')}
                     </div>
                     <div className="text-gray-500 dark:text-gray-400">{user?.email}</div>
                   </div>
@@ -166,13 +168,15 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
                 <Avatar
                   email={user?.email}
                   name={
-                    user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')
+                    user?.user_metadata?.name ||
+                    (user?.email ? (user.email.split('@').at(0) ?? 'User') : 'User')
                   }
                   size="lg"
                 />
                 <div>
                   <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')}
+                    {user?.user_metadata?.name ||
+                      (user?.email ? (user.email.split('@').at(0) ?? 'User') : 'User')}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
                 </div>

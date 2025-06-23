@@ -23,7 +23,7 @@ export const fetchTasks = async (
       return { data: [], error: handleSupabaseError(error, 'Fetch tasks') }
     }
 
-    return { data: data as Task[] || [], error: null }
+    return { data: (data as Task[]) || [], error: null }
   } catch (error) {
     return { data: [], error: handleSupabaseError(error, 'Fetch tasks') }
   }
@@ -49,9 +49,8 @@ export const createTask = async (
       .order('order_index', { ascending: false })
       .limit(1)
 
-    const nextOrderIndex = existingTasks && existingTasks.length > 0
-      ? (existingTasks[0].order_index || 0) + 1
-      : 1
+    const nextOrderIndex =
+      existingTasks && existingTasks.length > 0 ? (existingTasks[0].order_index || 0) + 1 : 1
 
     const newTask = {
       title: taskData.title.trim(),
@@ -61,14 +60,10 @@ export const createTask = async (
       category_id: taskData.category_id || null,
       due_date: taskData.due_date || null,
       user_id: userId,
-      order_index: nextOrderIndex
+      order_index: nextOrderIndex,
     }
 
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([newTask])
-      .select()
-      .single()
+    const { data, error } = await supabase.from('tasks').insert([newTask]).select().single()
 
     if (error) {
       return { data: null, error: handleSupabaseError(error, 'Create task') }
@@ -96,13 +91,14 @@ export const updateTask = async (
     // Prepare the update object
     const updateData = {
       ...updates,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     }
 
-    // Remove undefined values
+    // ES2022: Remove undefined values using Object.hasOwn() for cleaner property checking
     Object.keys(updateData).forEach(key => {
-      if (updateData[key as keyof typeof updateData] === undefined) {
-        delete updateData[key as keyof typeof updateData]
+      const typedKey = key as keyof typeof updateData
+      if (Object.hasOwn(updateData, typedKey) && updateData[typedKey] === undefined) {
+        delete updateData[typedKey]
       }
     })
 
@@ -136,11 +132,7 @@ export const deleteTask = async (
       return { error: 'Task ID and User ID are required' }
     }
 
-    const { error } = await supabase
-      .from('tasks')
-      .delete()
-      .eq('id', taskId)
-      .eq('user_id', userId)
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId).eq('user_id', userId)
 
     if (error) {
       return { error: handleSupabaseError(error, 'Delete task') }
@@ -168,7 +160,7 @@ export const reorderTasks = async (
     const updates = taskIds.map((taskId, index) => ({
       id: taskId,
       order_index: index + 1,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     }))
 
     // Execute all updates in parallel
@@ -178,7 +170,7 @@ export const reorderTasks = async (
           .from('tasks')
           .update({
             order_index: update.order_index,
-            updated_at: update.updated_at
+            updated_at: update.updated_at,
           })
           .eq('id', update.id)
           .eq('user_id', userId)
@@ -200,7 +192,9 @@ export const reorderTasks = async (
 /**
  * Fetch all categories for a user
  */
-export const fetchCategories = async (userId: string): Promise<{ data: Category[]; error: string | null }> => {
+export const fetchCategories = async (
+  userId: string
+): Promise<{ data: Category[]; error: string | null }> => {
   try {
     if (!userId) {
       return { data: [], error: 'User ID is required' }
@@ -216,7 +210,7 @@ export const fetchCategories = async (userId: string): Promise<{ data: Category[
       return { data: [], error: handleSupabaseError(error, 'Fetch categories') }
     }
 
-    return { data: data as Category[] || [], error: null }
+    return { data: (data as Category[]) || [], error: null }
   } catch (error) {
     return { data: [], error: handleSupabaseError(error, 'Fetch categories') }
   }
@@ -237,7 +231,7 @@ export const createCategory = async (
     const newCategory = {
       name: categoryData.name.trim(),
       color: categoryData.color || '#6b7280',
-      user_id: userId
+      user_id: userId,
     }
 
     const { data, error } = await supabase
@@ -259,7 +253,10 @@ export const createCategory = async (
 /**
  * Delete a category
  */
-export const deleteCategory = async (categoryId: string, userId: string): Promise<{ error: string | null }> => {
+export const deleteCategory = async (
+  categoryId: string,
+  userId: string
+): Promise<{ error: string | null }> => {
   try {
     if (!categoryId || !userId) {
       return { error: 'Category ID and User ID are required' }
@@ -301,7 +298,7 @@ export const subscribeToTasks = (userId: string, onTaskChange: (payload: unknown
         event: '*',
         schema: 'public',
         table: 'tasks',
-        filter: `user_id=eq.${userId}`
+        filter: `user_id=eq.${userId}`,
       },
       (payload: unknown) => {
         onTaskChange(payload)
@@ -313,7 +310,10 @@ export const subscribeToTasks = (userId: string, onTaskChange: (payload: unknown
 /**
  * Subscribe to real-time category changes
  */
-export const subscribeToCategories = (userId: string, onCategoryChange: (payload: unknown) => void) => {
+export const subscribeToCategories = (
+  userId: string,
+  onCategoryChange: (payload: unknown) => void
+) => {
   return supabase
     .channel('categories-changes')
     .on(
@@ -322,7 +322,7 @@ export const subscribeToCategories = (userId: string, onCategoryChange: (payload
         event: '*',
         schema: 'public',
         table: 'categories',
-        filter: `user_id=eq.${userId}`
+        filter: `user_id=eq.${userId}`,
       },
       (payload: unknown) => {
         onCategoryChange(payload)

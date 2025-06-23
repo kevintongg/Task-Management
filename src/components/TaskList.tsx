@@ -60,9 +60,10 @@ const TaskList: React.FC<TaskListProps> = ({
           if (!a.due_date) return 1
           if (!b.due_date) return -1
           return new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-        case 'priority':
+        case 'priority': {
           const priorityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 }
           return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0)
+        }
         case 'created_at':
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -163,24 +164,24 @@ const TaskList: React.FC<TaskListProps> = ({
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-center sm:text-left">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              Tasks
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Manage and organize your tasks efficiently
-            </p>
-          </div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                Tasks
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                Manage and organize your tasks efficiently
+              </p>
+            </div>
 
             {/* New Task button - responsive positioning */}
             <div className="flex justify-center sm:justify-end">
-            <button
-              onClick={handleCreateTask}
-              disabled={isCreating || loading}
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              {isCreating ? 'Creating...' : 'New Task'}
-            </button>
+              <button
+                onClick={handleCreateTask}
+                disabled={isCreating || loading}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                {isCreating ? 'Creating...' : 'New Task'}
+              </button>
             </div>
           </div>
         </div>

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.pnpm/
+
+# Build outputs
+dist/
+build/
+coverage/
+.vite/
+html/
+
+# Generated files
+*.min.js
+*.min.css
+*.bundle.js
+
+# Logs
+*.log
+
+# Other
+.env*
+*.md
+CHANGELOG.md
+LICENSE
+pnpm-lock.yaml

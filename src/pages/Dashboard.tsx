@@ -49,7 +49,7 @@ const Dashboard: React.FC = () => {
     try {
       await signOut()
       navigate('/login')
-    } catch (err) {
+    } catch {
       setError('Failed to sign out')
     }
   }, [navigate])
@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
   const handleCreateTask = async (taskData: TaskFormData) => {
     try {
       await createTask(taskData)
-    } catch (err) {
+    } catch {
       setError('Failed to create task')
     }
   }
@@ -66,7 +66,7 @@ const Dashboard: React.FC = () => {
   const handleUpdateTask = async (taskId: string, updates: TaskUpdate) => {
     try {
       await updateTask(taskId, updates)
-    } catch (err) {
+    } catch {
       setError('Failed to update task')
     }
   }
@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
   const handleDeleteTask = async (taskId: string) => {
     try {
       await deleteTask(taskId)
-    } catch (err) {
+    } catch {
       setError('Failed to delete task')
     }
   }
@@ -82,14 +82,16 @@ const Dashboard: React.FC = () => {
   const handleReorderTasks = async (sourceIndex: number, destinationIndex: number) => {
     try {
       await reorderTasks(sourceIndex, destinationIndex)
-    } catch (err) {
+    } catch {
       setError('Failed to reorder tasks')
     }
   }
 
-  // Get user display name
+  // Get user display name - ES2022: Use Array.at() for cleaner array access
   const getUserDisplayName = (user: User): string => {
-    return user?.user_metadata?.name || (user?.email ? user.email.split('@')[0] : 'User')
+    return (
+      user?.user_metadata?.name || (user?.email ? (user.email.split('@').at(0) ?? 'User') : 'User')
+    )
   }
 
   // Filter tasks by selected category

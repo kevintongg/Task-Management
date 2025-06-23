@@ -260,24 +260,43 @@ export interface AppError extends Error {
   statusCode?: number
 }
 
+// ES2022: Modern error classes with enhanced error handling
 export class TaskError extends Error {
+  // ES2022: Private fields for internal state
+  #timestamp = new Date().toISOString()
+
   constructor(
     message: string,
     public code?: string,
-    public details?: string
+    public details?: string,
+    cause?: Error // ES2022: Error.cause for chained errors
   ) {
-    super(message)
+    super(message, { cause }) // ES2022: Pass cause to super
     this.name = 'TaskError'
+  }
+
+  // ES2022: Getter for private field
+  get timestamp(): string {
+    return this.#timestamp
   }
 }
 
 export class AuthError extends Error {
+  // ES2022: Private fields for internal state
+  #timestamp = new Date().toISOString()
+
   constructor(
     message: string,
     public code?: string,
-    public details?: string
+    public details?: string,
+    cause?: Error // ES2022: Error.cause for chained errors
   ) {
-    super(message)
+    super(message, { cause }) // ES2022: Pass cause to super
     this.name = 'AuthError'
+  }
+
+  // ES2022: Getter for private field
+  get timestamp(): string {
+    return this.#timestamp
   }
 }

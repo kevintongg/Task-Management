@@ -10,7 +10,8 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export const useTheme = () => {
+// Hook to use theme context - kept in same file to avoid circular dependencies
+const useTheme = () => {
   const context = useContext(ThemeContext)
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider')
@@ -59,15 +60,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // Guard against environments where window.matchMedia is not available (like tests)
     if (typeof window !== 'undefined' && window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      const handleChange = (e: MediaQueryListEvent) => {
-        // Only update if user hasn't set a manual preference
-        if (!localStorage.getItem('theme')) {
-          setTheme(e.matches ? 'dark' : 'light')
+
+      // Additional guard to ensure mediaQuery has the addEventListener method
+      if (mediaQuery && typeof mediaQuery.addEventListener === 'function') {
+        const handleChange = (e: MediaQueryListEvent) => {
+          // Only update if user hasn't set a manual preference
+          if (typeof localStorage !== 'undefined' && !localStorage.getItem('theme')) {
+            setTheme(e.matches ? 'dark' : 'light')
+          }
+        }
+
+        mediaQuery.addEventListener('change', handleChange)
+        return () => {
+          if (typeof mediaQuery.removeEventListener === 'function') {
+            mediaQuery.removeEventListener('change', handleChange)
+          }
         }
       }
-
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
     }
     // Return undefined for environments where matchMedia is not available
     return undefined
@@ -81,3 +90,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
+
+// Export hook separately - keeping in same file due to tight coupling with context
+// eslint-disable-next-line react-refresh/only-export-components
+export { useTheme }

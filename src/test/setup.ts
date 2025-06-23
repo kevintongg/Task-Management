@@ -13,10 +13,7 @@ global.IntersectionObserver = class MockIntersectionObserver implements Intersec
   readonly rootMargin: string = '0px'
   readonly thresholds: ReadonlyArray<number> = []
 
-  constructor(
-    _callback: IntersectionObserverCallback,
-    _options?: IntersectionObserverInit
-  ) {
+  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {
     // Mock implementation - parameters ignored intentionally
   }
 
@@ -26,7 +23,7 @@ global.IntersectionObserver = class MockIntersectionObserver implements Intersec
   takeRecords(): IntersectionObserverEntry[] {
     return []
   }
-} as any
+}
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -53,6 +50,11 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 })
+
+// Also ensure matchMedia exists on globalThis for completeness
+if (typeof globalThis !== 'undefined') {
+  globalThis.matchMedia = window.matchMedia
+}
 
 // Mock window.scrollTo
 Object.defineProperty(window, 'scrollTo', {
@@ -117,7 +119,7 @@ vi.mock('../../utils/supabase.ts', async () => {
         signUp: vi.fn(),
         signOut: vi.fn(),
         onAuthStateChange: vi.fn(() => ({
-          data: { subscription: { unsubscribe: vi.fn() } }
+          data: { subscription: { unsubscribe: vi.fn() } },
         })),
       },
       from: vi.fn(() => ({

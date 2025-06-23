@@ -160,12 +160,12 @@ const AuthForm: React.FC<
           name === 'email'
             ? 'email'
             : name === 'password'
-            ? isSignup
-              ? 'new-password'
-              : 'current-password'
-            : name === 'confirmPassword'
-            ? 'new-password'
-            : 'name'
+              ? isSignup
+                ? 'new-password'
+                : 'current-password'
+              : name === 'confirmPassword'
+                ? 'new-password'
+                : 'name'
         }
       />
 

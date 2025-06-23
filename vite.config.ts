@@ -42,7 +42,7 @@ export default defineConfig({
 
   // Build configuration
   build: {
-    target: 'es2015',
+    target: 'es2022',
     outDir: 'dist',
     sourcemap: false, // Set to true for debugging production
     minify: 'esbuild',
@@ -64,7 +64,7 @@ export default defineConfig({
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`
 
           const info = assetInfo.name.split('.')
-          const _extType = info[info.length - 1]
+          const _extType = info.at(-1) // ES2022: Use Array.at() instead of length-1
 
           if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
             return `assets/images/[name]-[hash][extname]`
