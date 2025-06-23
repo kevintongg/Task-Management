@@ -1,9 +1,7 @@
 {
-  "functions": {
-    "api/updateTaskOrder.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
   "rewrites": [
     {
       "source": "/((?!api/).*)",
@@ -29,4 +27,4 @@
       ]
     }
   ]
-} 
+}
