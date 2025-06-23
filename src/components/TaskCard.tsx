@@ -133,36 +133,6 @@ const TaskCard: React.FC<TaskCardProps & { dragHandleProps?: any; isMobile?: boo
   }
 
   /**
-   * Check if task is overdue
-   */
-  const isOverdue = (): boolean => {
-    if (!task.due_date) return false
-    const today = new Date()
-    today.setHours(23, 59, 59, 999) // End of today in user's timezone
-    const dueDate = parseDate(task.due_date)
-    dueDate.setHours(23, 59, 59, 999) // End of due date
-    return dueDate < today && !task.completed
-  }
-
-  /**
-   * Check if task is due soon (tomorrow in user's timezone)
-   */
-  const isDueSoon = (): boolean => {
-    if (!task.due_date) return false
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-
-    const dueDate = parseDate(task.due_date)
-
-    // Normalize to compare dates only
-    const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
-    const tomorrowOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate())
-
-    return dueDateOnly.getTime() === tomorrowOnly.getTime() && !task.completed
-  }
-
-  /**
    * Format due date for display with timezone context and collaborative clarity
    */
   const formatDueDate = (dateString: string): string => {
