@@ -1,5 +1,6 @@
-import { Bell, LogOut, Menu, Settings, User, X } from 'lucide-react'
+import { Bell, LogOut, Menu, Settings as SettingsIcon, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { NavbarProps } from '../types'
 import Avatar from './Avatar'
 import ThemeToggle from './ThemeToggle'
@@ -117,15 +118,23 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
                     <div className="text-gray-500 dark:text-gray-400">{user?.email}</div>
                   </div>
 
-                  <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
                     <User className="h-4 w-4 mr-3" />
                     Profile
-                  </button>
+                  </Link>
 
-                  <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <Settings className="h-4 w-4 mr-3" />
+                  <Link
+                    to="/settings"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <SettingsIcon className="h-4 w-4 mr-3" />
                     Settings
-                  </button>
+                  </Link>
 
                   <div className="border-t border-gray-200 dark:border-gray-700"></div>
 
@@ -216,15 +225,23 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
             {/* Mobile Menu Actions */}
             <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
               <div className="space-y-1">
-                <button className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                <Link
+                  to="/profile"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                >
                   <User className="h-4 w-4 mr-3" />
                   Profile
-                </button>
+                </Link>
 
-                <button className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
-                  <Settings className="h-4 w-4 mr-3" />
+                <Link
+                  to="/settings"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                >
+                  <SettingsIcon className="h-4 w-4 mr-3" />
                   Settings
-                </button>
+                </Link>
 
                 <button
                   onClick={handleSignOut}

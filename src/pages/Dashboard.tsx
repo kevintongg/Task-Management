@@ -1,4 +1,4 @@
-import { AlertCircle, Settings } from 'lucide-react'
+import { AlertCircle, Settings as SettingsIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CategoryFilter from '../components/CategoryFilter'
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
                 disabled={tasksLoading}
                 className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-blue-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
               >
-                <Settings className="h-4 w-4 mr-2" />
+                <SettingsIcon className="h-4 w-4 mr-2" />
                 Refresh
               </button>
             </div>

@@ -111,12 +111,22 @@ const TaskList: React.FC<TaskListProps> = ({
 
     setIsCreating(true)
     try {
+      // Set default due date to tomorrow in user's local timezone
+      // Use local date calculation to avoid timezone conversion issues
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = today.getMonth()
+      const day = today.getDate()
+
+      const tomorrow = new Date(year, month, day + 1)
+      const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`
+
       const newTask: TaskFormData = {
         title: 'New Task',
         description: '',
         priority: 'medium',
         category_id: selectedCategory !== 'all' ? selectedCategory : undefined,
-        due_date: undefined,
+        due_date: tomorrowStr,
       }
 
       await onCreateTask?.(newTask)

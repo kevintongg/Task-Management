@@ -1,5 +1,5 @@
 import { AlertTriangle, Calendar, Tag, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Category, Task } from '../types'
 import Modal from './Modal'
 
@@ -19,6 +19,23 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   onConfirm,
 }) => {
   const [isDeleting, setIsDeleting] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  // Focus the modal when it opens
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      // Small delay to ensure modal is rendered
+      const timer = setTimeout(() => {
+        const focusButton = modalRef.current?.querySelector(
+          '[data-focus-trap]'
+        ) as HTMLButtonElement
+        if (focusButton) {
+          focusButton.focus()
+        }
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen])
 
   const handleDelete = async () => {
     if (!task) return
@@ -31,12 +48,29 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
       console.error('Failed to delete task:', error)
     } finally {
       setIsDeleting(false)
+      // Refocus modal after deletion attempt
+      const focusButton = modalRef.current?.querySelector('[data-focus-trap]') as HTMLButtonElement
+      if (focusButton) {
+        focusButton.focus()
+      }
     }
   }
 
   const handleClose = () => {
     if (!isDeleting) {
       onClose()
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isDeleting) return
+
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleDelete()
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      handleClose()
     }
   }
 
@@ -91,7 +125,16 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
       size="md"
       showCloseButton={!isDeleting}
     >
-      <div className="space-y-6">
+      <div ref={modalRef} className="space-y-6" onKeyDown={handleKeyDown}>
+        {/* Hidden focus trap button */}
+        <button
+          data-focus-trap
+          className="sr-only"
+          tabIndex={-1}
+          style={{ position: 'absolute', left: '-9999px' }}
+          aria-hidden="true"
+        />
+
         {/* Warning Icon and Message */}
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="flex-shrink-0">
@@ -171,19 +214,29 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-4">
+        {/* Action Buttons - Centered */}
+        <div className="flex justify-center space-x-3 pt-4">
           <button
             onClick={handleClose}
             disabled={isDeleting}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
+            className="inline-flex items-center justify-center px-6 py-2.5 min-w-[120px] text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 font-medium"
           >
             Cancel
           </button>
           <button
-            onClick={handleDelete}
+            onClick={e => {
+              handleDelete()
+              // Prevent losing focus
+              e.currentTarget.blur()
+              const focusButton = modalRef.current?.querySelector(
+                '[data-focus-trap]'
+              ) as HTMLButtonElement
+              if (focusButton) {
+                focusButton.focus()
+              }
+            }}
             disabled={isDeleting}
-            className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-2.5 min-w-[120px] bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 transition-colors font-medium"
           >
             {isDeleting ? (
               <>
@@ -199,10 +252,19 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </button>
         </div>
 
-        {/* Keyboard Shortcut Hint */}
-        <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2">
-          Press <kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Esc</kbd>{' '}
-          to cancel
+        {/* Keyboard Hints */}
+        <div className="text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Press{' '}
+            <kbd className="px-1.5 py-0.5 text-xs font-mono bg-gray-100 dark:bg-gray-700 rounded border">
+              Enter
+            </kbd>{' '}
+            to delete or{' '}
+            <kbd className="px-1.5 py-0.5 text-xs font-mono bg-gray-100 dark:bg-gray-700 rounded border">
+              Esc
+            </kbd>{' '}
+            to cancel
+          </p>
         </div>
       </div>
     </Modal>

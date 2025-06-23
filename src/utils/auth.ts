@@ -1,6 +1,6 @@
-import type { AuthChangeEvent } from '@supabase/supabase-js'
-import type { AuthFormData, User } from '../types'
-import { handleSupabaseError, supabase } from './supabase'
+import type { AuthChangeEvent } from '@supabase/supabase-js';
+import type { AuthFormData, User } from '../types';
+import { handleSupabaseError, supabase } from './supabase';
 
 /**
  * Sign up a new user with email and password
@@ -165,4 +165,78 @@ export const onAuthStateChange = (
 export const isAuthenticated = async (): Promise<boolean> => {
   const { user } = await getCurrentUser()
   return !!user
+}
+
+/**
+ * Sign in with OAuth provider (Google, GitHub, etc.)
+ */
+export const signInWithOAuth = async (
+  provider: 'google' | 'github' | 'azure' | 'apple' | 'discord' | 'linkedin' | 'facebook'
+): Promise<{ error: string | null }> => {
+  try {
+          const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      })
+
+    if (error) {
+      return { error: handleSupabaseError(error, `OAuth ${provider} sign in`) }
+    }
+
+    return { error: null }
+  } catch (error) {
+    return { error: handleSupabaseError(error, `OAuth ${provider} sign in`) }
+  }
+}
+
+/**
+ * Link an OAuth provider to existing account
+ */
+export const linkOAuthAccount = async (
+  provider: 'google' | 'github' | 'azure' | 'apple' | 'discord' | 'linkedin' | 'facebook'
+): Promise<{ error: string | null }> => {
+  try {
+    const { error } = await supabase.auth.linkIdentity({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/settings?linked=${provider}`,
+      },
+    })
+
+    if (error) {
+      return { error: handleSupabaseError(error, `Link ${provider} account`) }
+    }
+
+    return { error: null }
+  } catch (error) {
+    return { error: handleSupabaseError(error, `Link ${provider} account`) }
+  }
+}
+
+/**
+ * Get user's linked OAuth providers (for future account management)
+ */
+export const getUserIdentities = async (): Promise<{
+  identities: unknown[]
+  error: string | null
+}> => {
+  try {
+    const { user } = await getCurrentUser()
+
+    if (!user) {
+      return { identities: [], error: 'No authenticated user' }
+    }
+
+    // For now, just return basic info - we can enhance this later
+    // when Supabase types are more stable
+    return { identities: [], error: null }
+  } catch (error) {
+    return { identities: [], error: handleSupabaseError(error, 'Get user identities') }
+  }
 }

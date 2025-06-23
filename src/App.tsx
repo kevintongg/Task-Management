@@ -3,9 +3,14 @@ import React, { Component, ReactNode } from 'react'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import './App.css'
 import { ThemeProvider } from './contexts/ThemeContext'
+import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
+import ForgotPassword from './pages/ForgotPassword'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Profile from './pages/Profile'
+import ResetPassword from './pages/ResetPassword'
+import Settings from './pages/Settings'
 import Signup from './pages/Signup'
 import type { User } from './types'
 import { onAuthStateChange } from './utils/auth'
@@ -209,6 +214,25 @@ const App: React.FC = () => {
                     </PublicRoute>
                   }
                 />
+                <Route
+                  path="/forgot-password"
+                  element={
+                    <PublicRoute>
+                      <ForgotPassword />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/reset-password"
+                  element={
+                    <PublicRoute>
+                      <ResetPassword />
+                    </PublicRoute>
+                  }
+                />
+
+                {/* OAuth callback route - needs special handling */}
+                <Route path="/auth/callback" element={<AuthCallback />} />
 
                 {/* Protected routes */}
                 <Route
@@ -216,6 +240,22 @@ const App: React.FC = () => {
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
                     </ProtectedRoute>
                   }
                 />

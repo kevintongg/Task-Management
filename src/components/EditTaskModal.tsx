@@ -1,5 +1,5 @@
 import { Calendar, Save, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Category, Task, TaskUpdate } from '../types'
 import CategoryFilter from './CategoryFilter'
 import Modal from './Modal'
@@ -32,21 +32,47 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isDeleting, setIsDeleting] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
 
   // Initialize form data when task changes
   useEffect(() => {
     if (task) {
+      // Handle due_date - convert to datetime-local format if it exists
+      let dueDateValue = ''
+      if (task.due_date) {
+        const date = new Date(task.due_date)
+        // Format as YYYY-MM-DDTHH:MM for datetime-local input
+        dueDateValue = date.toISOString().slice(0, 16)
+      }
+
       setFormData({
         title: task.title || '',
         description: task.description || '',
         priority: task.priority || 'medium',
         category_id: task.category_id || '',
-        due_date: task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '',
+        due_date: dueDateValue,
         completed: task.completed || false,
       })
       setErrors({})
     }
   }, [task])
+
+  // Focus the modal when it opens
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      // Small delay to ensure modal is rendered
+      const timer = setTimeout(() => {
+        const focusButton = modalRef.current?.querySelector(
+          '[data-focus-trap]'
+        ) as HTMLButtonElement
+        if (focusButton) {
+          focusButton.focus()
+        }
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [isOpen])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -62,11 +88,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     }
 
     if (formData.due_date) {
+      // Parse the due date (now in YYYY-MM-DDTHH:MM format)
       const dueDate = new Date(formData.due_date)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
+      const now = new Date()
 
-      if (dueDate < today) {
+      if (dueDate < now) {
         newErrors.due_date = 'Due date cannot be in the past'
       }
     }
@@ -96,6 +122,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       setErrors({ general: 'Failed to save task. Please try again.' })
     } finally {
       setIsLoading(false)
+      // Refocus modal after save attempt
+      const focusButton = modalRef.current?.querySelector('[data-focus-trap]') as HTMLButtonElement
+      if (focusButton) {
+        focusButton.focus()
+      }
     }
   }
 
@@ -129,9 +160,14 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isLoading || isDeleting) return
+
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault()
       handleSave()
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      handleClose()
     }
   }
 
@@ -145,7 +181,16 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       size="lg"
       showCloseButton={!isLoading && !isDeleting}
     >
-      <div className="space-y-6" onKeyDown={handleKeyDown}>
+      <div ref={modalRef} className="space-y-6" onKeyDown={handleKeyDown}>
+        {/* Hidden focus trap button */}
+        <button
+          data-focus-trap
+          className="sr-only"
+          tabIndex={-1}
+          style={{ position: 'absolute', left: '-9999px' }}
+          aria-hidden="true"
+        />
+
         {/* General Error */}
         {errors.general && (
           <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -243,15 +288,15 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
           </div>
         </div>
 
-        {/* Due Date */}
+        {/* Due Date and Time */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Due Date
+            Due Date & Time
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
             <input
-              type="date"
+              type="datetime-local"
               value={formData.due_date}
               onChange={e => setFormData(prev => ({ ...prev, due_date: e.target.value }))}
               className={`w-full pl-11 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
@@ -260,15 +305,15 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                   : 'border-gray-300 dark:border-gray-600'
               }`}
               disabled={isLoading || isDeleting}
-              style={{
-                position: 'relative',
-                zIndex: 'auto',
-              }}
+              placeholder="Select date and time"
             />
           </div>
           {errors.due_date && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.due_date}</p>
           )}
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Set a specific date and time for your task deadline
+          </p>
         </div>
 
         {/* Completed Status */}
@@ -322,7 +367,17 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               Cancel
             </button>
             <button
-              onClick={handleSave}
+              onClick={e => {
+                handleSave()
+                // Prevent losing focus
+                e.currentTarget.blur()
+                const focusButton = modalRef.current?.querySelector(
+                  '[data-focus-trap]'
+                ) as HTMLButtonElement
+                if (focusButton) {
+                  focusButton.focus()
+                }
+              }}
               disabled={isLoading || isDeleting}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 transition-colors"
             >
@@ -344,10 +399,14 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         {/* Keyboard Shortcut Hint */}
         <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2">
           Press{' '}
-          <kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">
-            Cmd/Ctrl + Enter
+          <kbd className="px-1.5 py-0.5 text-xs font-mono bg-gray-100 dark:bg-gray-700 rounded border">
+            Ctrl+Enter
           </kbd>{' '}
-          to save
+          to save or{' '}
+          <kbd className="px-1.5 py-0.5 text-xs font-mono bg-gray-100 dark:bg-gray-700 rounded border">
+            Esc
+          </kbd>{' '}
+          to cancel
         </div>
       </div>
     </Modal>

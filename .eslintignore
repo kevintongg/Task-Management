@@ -1,7 +1,0 @@
-dist/
-html/
-node_modules/
-build/
-coverage/
-*.min.js
-*.bundle.js
