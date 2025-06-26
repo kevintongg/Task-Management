@@ -1,8 +1,10 @@
 import { Bell, LogOut, Menu, Settings as SettingsIcon, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useNotifications } from '../hooks/useNotifications'
 import type { NavbarProps } from '../types'
 import Avatar from './Avatar'
+import NotificationDropdown from './NotificationDropdown'
 import ThemeToggle from './ThemeToggle'
 
 /**
@@ -12,10 +14,15 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
   // State for mobile menu and user dropdown
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState<boolean>(false)
 
   // Refs for click outside detection
   const userMenuRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const notificationsRef = useRef<HTMLDivElement>(null)
+
+  // Get notification context
+  const { unreadCount } = useNotifications()
 
   /**
    * Handle click outside to close menus
@@ -27,6 +34,9 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setIsMobileMenuOpen(false)
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false)
       }
     }
 
@@ -40,6 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
   const handleSignOut = async () => {
     setIsUserMenuOpen(false)
     setIsMobileMenuOpen(false)
+    setIsNotificationsOpen(false)
     onSignOut()
   }
 
@@ -83,9 +94,24 @@ const Navbar: React.FC<NavbarProps> = ({ user, onSignOut, taskStats = null }) =>
             <ThemeToggle />
 
             {/* Notifications */}
-            <button className="p-2 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-              <Bell className="h-5 w-5" />
-            </button>
+            <div className="relative" ref={notificationsRef}>
+              <button
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="relative p-2 text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              <NotificationDropdown
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+              />
+            </div>
 
             {/* User Menu */}
             <div className="relative" ref={userMenuRef}>

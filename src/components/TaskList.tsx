@@ -15,11 +15,17 @@ import {
 } from '@dnd-kit/sortable'
 import { AlertCircle, Calendar, Plus, Search } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import type { Category, Task, TaskFormData, TaskListProps } from '../types'
-import CategoryFilter from './CategoryFilter'
+import type { Task, TaskFormData, TaskListProps } from '../types'
 import SortableTaskCard from './TaskCard'
 
-const TaskList: React.FC<TaskListProps> = ({
+// Enhanced TaskListProps to include selection functionality
+interface EnhancedTaskListProps extends TaskListProps {
+  selectedTasks?: Set<string>
+  onSelectionChange?: (taskIds: Set<string>) => void
+  showSelection?: boolean
+}
+
+const TaskList: React.FC<EnhancedTaskListProps> = ({
   tasks = [],
   categories = [],
   onCreateTask,
@@ -28,9 +34,11 @@ const TaskList: React.FC<TaskListProps> = ({
   onReorderTasks,
   loading = false,
   error = null,
+  selectedTasks = new Set(),
+  onSelectionChange,
+  showSelection = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState<string>('created_at')
   const [showCompleted, setShowCompleted] = useState<boolean>(true)
   const [isCreating, setIsCreating] = useState<boolean>(false)
@@ -43,13 +51,10 @@ const TaskList: React.FC<TaskListProps> = ({
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.description?.toLowerCase().includes(searchQuery.toLowerCase())
 
-      // Category filter
-      const matchesCategory = selectedCategory === 'all' || task.category_id === selectedCategory
-
       // Completed filter
       const matchesCompleted = showCompleted || !task.completed
 
-      return matchesSearch && matchesCategory && matchesCompleted
+      return matchesSearch && matchesCompleted
     })
     .sort((a: Task, b: Task) => {
       switch (sortBy) {
@@ -105,6 +110,19 @@ const TaskList: React.FC<TaskListProps> = ({
     [filteredTasks, onReorderTasks]
   )
 
+  // Handle individual task selection
+  const handleTaskSelection = (taskId: string, selected: boolean) => {
+    if (!onSelectionChange) return
+
+    const newSelection = new Set(selectedTasks)
+    if (selected) {
+      newSelection.add(taskId)
+    } else {
+      newSelection.delete(taskId)
+    }
+    onSelectionChange(newSelection)
+  }
+
   // Handle create new task
   const handleCreateTask = useCallback(async () => {
     if (isCreating) return
@@ -125,7 +143,7 @@ const TaskList: React.FC<TaskListProps> = ({
         title: 'New Task',
         description: '',
         priority: 'medium',
-        category_id: selectedCategory !== 'all' ? selectedCategory : undefined,
+        category_id: undefined,
         due_date: tomorrowStr,
       }
 
@@ -135,17 +153,7 @@ const TaskList: React.FC<TaskListProps> = ({
     } finally {
       setIsCreating(false)
     }
-  }, [isCreating, onCreateTask, selectedCategory])
-
-  // Get task statistics
-  const taskStats = {
-    total: tasks.length,
-    completed: tasks.filter((t: Task) => t.completed).length,
-    pending: tasks.filter((t: Task) => !t.completed).length,
-    overdue: tasks.filter(
-      (t: Task) => !t.completed && t.due_date && new Date(t.due_date) < new Date()
-    ).length,
-  }
+  }, [isCreating, onCreateTask])
 
   if (error) {
     return (
@@ -196,130 +204,85 @@ const TaskList: React.FC<TaskListProps> = ({
           </div>
         </div>
 
-        {/* Task Statistics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 lg:p-6 text-center border border-gray-100 dark:border-gray-600">
-            <div className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-1">
-              {taskStats.total}
-            </div>
-            <div className="text-sm lg:text-base font-medium text-gray-600 dark:text-gray-400">
-              Total
-            </div>
-          </div>
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 lg:p-6 text-center border border-green-100 dark:border-green-800">
-            <div className="text-3xl lg:text-4xl font-bold text-green-600 dark:text-green-400 mb-1">
-              {taskStats.completed}
-            </div>
-            <div className="text-sm lg:text-base font-medium text-green-700 dark:text-green-300">
-              Completed
-            </div>
-          </div>
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 lg:p-6 text-center border border-blue-100 dark:border-blue-800">
-            <div className="text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-              {taskStats.pending}
-            </div>
-            <div className="text-sm lg:text-base font-medium text-blue-700 dark:text-blue-300">
-              Pending
-            </div>
-          </div>
-          <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 lg:p-6 text-center border border-red-100 dark:border-red-800">
-            <div className="text-3xl lg:text-4xl font-bold text-red-600 dark:text-red-400 mb-1">
-              {taskStats.overdue}
-            </div>
-            <div className="text-sm lg:text-base font-medium text-red-700 dark:text-red-300">
-              Overdue
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 lg:p-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4 lg:gap-6 max-w-6xl mx-auto">
+        {/* Filters and Search */}
+        <div className="mt-8 space-y-4">
           {/* Search */}
-          <div className="flex-1 lg:max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search tasks..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
-              />
-            </div>
-          </div>
-
-          {/* Category Filter */}
-          <div className="lg:w-48">
-            <CategoryFilter
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategoryChange={categoryId => setSelectedCategory(categoryId || 'all')}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
-          {/* Sort */}
-          <div className="lg:w-44">
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
-            >
-              <option value="created_at">Latest</option>
-              <option value="title">Title</option>
-              <option value="due_date">Due Date</option>
-              <option value="priority">Priority</option>
-            </select>
-          </div>
+          {/* Filter Controls */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Sort by:
+              </label>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="created_at">Created Date</option>
+                <option value="due_date">Due Date</option>
+                <option value="priority">Priority</option>
+                <option value="title">Title</option>
+              </select>
+            </div>
 
-          {/* Show Completed Toggle */}
-          <div className="flex items-center lg:ml-2">
-            <label className="flex items-center cursor-pointer">
+            <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={showCompleted}
                 onChange={e => setShowCompleted(e.target.checked)}
-                className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700 w-4 h-4"
+                className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
               />
-              <span className="ml-3 text-base font-medium text-gray-700 dark:text-gray-300">
-                Show completed
-              </span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Show completed</span>
             </label>
           </div>
         </div>
       </div>
 
-      {/* Tasks List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 max-w-6xl mx-auto mb-8">
-        {loading ? (
-          <div className="flex items-center justify-center p-12">
+      {/* Task List */}
+      {loading ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+          <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="ml-3 text-gray-600 dark:text-gray-300">Loading tasks...</span>
           </div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="text-center p-12">
-            <Calendar className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+        </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+          <div className="text-center">
+            <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No tasks found
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              {searchQuery || selectedCategory !== 'all'
+              {searchQuery || !showCompleted
                 ? 'Try adjusting your filters or search query.'
-                : 'Create your first task to get started!'}
+                : "You don't have any tasks yet. Create your first task to get started!"}
             </p>
-            {!searchQuery && selectedCategory === 'all' && (
+            {!searchQuery && showCompleted && (
               <button
                 onClick={handleCreateTask}
                 disabled={isCreating}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 transition-colors"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Create Task
+                {isCreating ? 'Creating...' : 'Create your first task'}
               </button>
             )}
           </div>
-        ) : (
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -329,27 +292,26 @@ const TaskList: React.FC<TaskListProps> = ({
               items={filteredTasks.map(task => task.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-1">
-                {filteredTasks.map((task: Task, index: number) => (
-                  <div key={task.id} className="group">
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredTasks.map(task => (
+                  <div key={task.id} className="p-4">
                     <SortableTaskCard
                       task={task}
-                      category={categories.find((c: Category) => c.id === task.category_id)}
+                      category={categories.find(cat => cat.id === task.category_id)}
+                      categories={categories}
                       onUpdate={onUpdateTask}
                       onDelete={onDeleteTask}
-                      isDragging={false}
-                      categories={categories}
+                      isSelected={selectedTasks.has(task.id)}
+                      onSelectionChange={handleTaskSelection}
+                      showSelection={showSelection}
                     />
-                    {index < filteredTasks.length - 1 && (
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-600 to-transparent mx-4 my-1 opacity-60" />
-                    )}
                   </div>
                 ))}
               </div>
             </SortableContext>
           </DndContext>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -4,10 +4,12 @@ import {
   AlertCircle,
   Calendar,
   Check,
+  CheckSquare,
   Clock,
   Edit,
   GripVertical,
   MoreHorizontal,
+  Square,
   Tag,
   Trash2,
 } from 'lucide-react'
@@ -16,10 +18,17 @@ import type { TaskCardProps, TaskUpdate } from '../types'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import EditTaskModal from './EditTaskModal'
 
+// Enhanced props interface to include selection functionality
+interface EnhancedTaskCardProps extends TaskCardProps {
+  isSelected?: boolean
+  onSelectionChange?: (taskId: string, selected: boolean) => void
+  showSelection?: boolean
+}
+
 /**
  * Sortable wrapper for TaskCard component
  */
-const SortableTaskCard: React.FC<TaskCardProps> = props => {
+const SortableTaskCard: React.FC<EnhancedTaskCardProps> = props => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: props.task.id,
   })
@@ -61,10 +70,10 @@ const SortableTaskCard: React.FC<TaskCardProps> = props => {
 }
 
 /**
- * Individual task card component with drag-and-drop support
+ * Individual task card component with drag-and-drop support and selection
  */
 const TaskCard: React.FC<
-  TaskCardProps & { dragHandleProps?: Record<string, unknown>; isMobile?: boolean }
+  EnhancedTaskCardProps & { dragHandleProps?: Record<string, unknown>; isMobile?: boolean }
 > = ({
   task,
   category,
@@ -73,6 +82,9 @@ const TaskCard: React.FC<
   isDragging = false,
   dragHandleProps,
   isMobile = false,
+  isSelected = false,
+  onSelectionChange,
+  showSelection = false,
 }) => {
   // State for modals and UI
   const [showMenu, setShowMenu] = useState<boolean>(false)
@@ -98,20 +110,32 @@ const TaskCard: React.FC<
   }, [])
 
   /**
+   * Handle selection change
+   */
+  const handleSelectionChange = () => {
+    if (onSelectionChange) {
+      onSelectionChange(task.id, !isSelected)
+    }
+  }
+
+  /**
    * Get priority color and styling
    */
   const getPriorityConfig = (priority: string) => {
     const configs = {
       high: {
-        color: 'bg-red-100 text-red-800 border-red-200',
+        color:
+          'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700',
         label: 'High',
       },
       medium: {
-        color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        color:
+          'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700',
         label: 'Medium',
       },
       low: {
-        color: 'bg-green-100 text-green-800 border-green-200',
+        color:
+          'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700',
         label: 'Low',
       },
     }
@@ -265,13 +289,32 @@ const TaskCard: React.FC<
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200 ${
+      className={`bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border transition-all duration-200 ${
         isDragging ? 'shadow-lg ring-2 ring-blue-200 dark:ring-blue-700' : 'hover:shadow-md'
-      } ${task.completed ? 'opacity-75' : ''} ${
-        isMobile ? 'active:shadow-md active:scale-[0.98] select-none' : ''
+      } ${isMobile ? 'active:shadow-md active:scale-[0.98] select-none' : ''} ${
+        isSelected
+          ? 'border-blue-500 dark:border-blue-400 ring-1 ring-blue-200 dark:ring-blue-800'
+          : 'border-gray-200 dark:border-gray-700'
       }`}
     >
       <div className="flex items-center gap-3 sm:gap-4">
+        {/* Selection Checkbox */}
+        {showSelection && (
+          <div className="flex-shrink-0 flex items-center justify-center">
+            <button
+              onClick={handleSelectionChange}
+              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              title={isSelected ? 'Deselect task' : 'Select task'}
+            >
+              {isSelected ? (
+                <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <Square className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Mobile drag indicator - Show on mobile only */}
         {isMobile && (
           <div className="flex sm:hidden flex-shrink-0 items-center justify-center w-6 h-6">
@@ -416,7 +459,7 @@ const TaskCard: React.FC<
 
       {/* Task Description and Category - Below main row */}
       {(task.description || category) && (
-        <div className="mt-2 sm:mt-3 ml-8 sm:ml-10">
+        <div className={`mt-2 sm:mt-3 ${showSelection ? 'ml-12 sm:ml-14' : 'ml-8 sm:ml-10'}`}>
           {/* Task Description */}
           {task.description && (
             <p
@@ -438,14 +481,17 @@ const TaskCard: React.FC<
               >
                 <Tag className="h-3 w-3" />
                 <span className="hidden sm:inline">{category.name}</span>
-                <span className="sm:hidden">{category.name.slice(0, 3)}</span>
               </span>
             )}
 
             {/* Created Date */}
-            <span className="hidden lg:flex text-gray-500 dark:text-gray-400 items-center gap-1 text-xs">
+            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {new Date(task.created_at).toLocaleDateString()}
+              {new Date(task.created_at).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </span>
           </div>
         </div>

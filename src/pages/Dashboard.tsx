@@ -1,7 +1,9 @@
-import { AlertCircle, Settings as SettingsIcon } from 'lucide-react'
+import { AlertCircle, Database, Settings as SettingsIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import BulkTaskActions from '../components/BulkTaskActions'
 import CategoryFilter from '../components/CategoryFilter'
+import DataManagement from '../components/DataManagement'
 import Navbar from '../components/Navbar'
 import TaskList from '../components/TaskList'
 import { useTasks } from '../hooks/useTasks'
@@ -14,6 +16,8 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
+  const [showDataManagement, setShowDataManagement] = useState(false)
 
   const {
     tasks,
@@ -87,6 +91,16 @@ const Dashboard: React.FC = () => {
     }
   }
 
+  // Selection handlers
+  const handleSelectionChange = (taskIds: Set<string>) => {
+    setSelectedTasks(taskIds)
+  }
+
+  const handleTasksUpdated = () => {
+    refreshTasks()
+    setSelectedTasks(new Set()) // Clear selection after bulk operations
+  }
+
   // Get user display name - ES2022: Use Array.at() for cleaner array access
   const getUserDisplayName = (user: User): string => {
     return (
@@ -150,8 +164,16 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
 
-            {/* Refresh button - responsive positioning */}
-            <div className="flex justify-center sm:justify-end">
+            {/* Action buttons - responsive positioning */}
+            <div className="flex justify-center sm:justify-end space-x-3">
+              <button
+                onClick={() => setShowDataManagement(!showDataManagement)}
+                className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-purple-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-purple-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors text-sm font-medium"
+              >
+                <Database className="h-4 w-4 mr-2" />
+                Data Management
+              </button>
+
               <button
                 onClick={refreshTasks}
                 disabled={tasksLoading}
@@ -183,6 +205,13 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
+        {/* Data Management Panel */}
+        {showDataManagement && user && (
+          <div className="mb-6 sm:mb-8">
+            <DataManagement userId={user.id} onDataUpdated={handleTasksUpdated} />
+          </div>
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
@@ -198,14 +227,13 @@ const Dashboard: React.FC = () => {
                   {taskStats.total}
                 </p>
               </div>
-              <div></div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-3 items-center">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-600 dark:bg-green-500 rounded"></div>
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-600 dark:bg-green-500 rounded-full"></div>
               </div>
               <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
@@ -215,14 +243,13 @@ const Dashboard: React.FC = () => {
                   {taskStats.completed}
                 </p>
               </div>
-              <div></div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-3 items-center">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-yellow-600 dark:bg-yellow-500 rounded"></div>
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-yellow-600 dark:bg-yellow-500 rounded-md"></div>
               </div>
               <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
@@ -232,119 +259,62 @@ const Dashboard: React.FC = () => {
                   {taskStats.pending}
                 </p>
               </div>
-              <div></div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-3 items-center">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-600 dark:bg-red-500 rounded"></div>
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-600 dark:bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></div>
               </div>
               <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
-                  Overdue
+                  Urgent
                 </p>
                 <p className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
-                  {
-                    tasks.filter(
-                      t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
-                    ).length
-                  }
+                  {taskStats.urgent}
                 </p>
               </div>
-              <div></div>
             </div>
           </div>
         </div>
 
-        {/* Priority Breakdown */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6 sm:mb-8">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Priority Distribution
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Breakdown of tasks by priority level
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="grid grid-cols-3 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 bg-green-600 dark:bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">-</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center text-center">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                  Low Priority
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {tasks.filter(t => t.priority === 'low').length}
-                </p>
-              </div>
-              <div></div>
-            </div>
-
-            <div className="grid grid-cols-3 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
-              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 bg-yellow-600 dark:bg-yellow-500 rounded flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">~</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center text-center">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                  Medium Priority
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {tasks.filter(t => t.priority === 'medium').length}
-                </p>
-              </div>
-              <div></div>
-            </div>
-
-            <div className="grid grid-cols-3 items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 bg-red-600 dark:bg-red-500 rounded flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">!</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center text-center">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-                  High Priority
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {tasks.filter(t => t.priority === 'high').length}
-                </p>
-              </div>
-              <div></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Category filter */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-4 sm:mb-6 p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
+        {/* Filters and Category Management */}
+        <div className="mb-6 sm:mb-8">
           <CategoryFilter
             categories={categories}
-            selectedCategory={selectedCategory}
+            selectedCategory={selectedCategory === 'all' ? undefined : selectedCategory}
             onCategoryChange={categoryId => setSelectedCategory(categoryId || 'all')}
+            onCreateCategory={() => {}} // This will be handled by the CategoryFilter component
           />
         </div>
 
-        {/* Task list */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-          <TaskList
+        {/* Bulk Task Actions */}
+        {filteredTasks.length > 0 && user && (
+          <BulkTaskActions
             tasks={filteredTasks}
             categories={categories}
-            loading={loading}
-            error={error || tasksError}
-            onCreateTask={handleCreateTask}
-            onUpdateTask={handleUpdateTask}
-            onDeleteTask={handleDeleteTask}
-            onReorderTasks={handleReorderTasks}
+            selectedTasks={selectedTasks}
+            onSelectionChange={handleSelectionChange}
+            onTasksUpdated={handleTasksUpdated}
+            userId={user.id}
           />
-        </div>
+        )}
+
+        {/* Task List */}
+        <TaskList
+          tasks={filteredTasks}
+          categories={categories}
+          loading={tasksLoading}
+          error={tasksError}
+          onCreateTask={handleCreateTask}
+          onUpdateTask={handleUpdateTask}
+          onDeleteTask={handleDeleteTask}
+          onReorderTasks={handleReorderTasks}
+          selectedTasks={selectedTasks}
+          onSelectionChange={handleSelectionChange}
+          showSelection={filteredTasks.length > 1}
+        />
       </main>
     </div>
   )
