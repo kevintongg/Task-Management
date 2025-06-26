@@ -9,13 +9,17 @@
     <!-- Theme Script - Must run before any content renders -->
     <script>
       ;(function () {
+        // Add class to prevent transitions during initial theme application
+        document.documentElement.classList.add('theme-loading')
+
         // Temporarily disable transitions to prevent flash
         document.documentElement.style.setProperty('transition', 'none', 'important')
+        document.documentElement.style.setProperty('animation', 'none', 'important')
 
         // Get theme from localStorage or system preference
         function getInitialTheme() {
           const savedTheme = localStorage.getItem('theme')
-          if (savedTheme) {
+          if (savedTheme && (savedTheme === 'dark' || savedTheme === 'light')) {
             return savedTheme
           }
 
@@ -31,16 +35,34 @@
         const theme = getInitialTheme()
         if (theme === 'dark') {
           document.documentElement.classList.add('dark')
+          document.documentElement.setAttribute('data-theme', 'dark')
         } else {
           document.documentElement.classList.remove('dark')
+          document.documentElement.setAttribute('data-theme', 'light')
         }
 
-        // Re-enable transitions after a brief delay
-        requestAnimationFrame(function () {
+        // Store the theme immediately
+        localStorage.setItem('theme', theme)
+
+        // Re-enable transitions after DOM is ready and painted
+        function enableTransitions() {
           requestAnimationFrame(function () {
-            document.documentElement.style.removeProperty('transition')
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                document.documentElement.classList.remove('theme-loading')
+                document.documentElement.style.removeProperty('transition')
+                document.documentElement.style.removeProperty('animation')
+              })
+            })
           })
-        })
+        }
+
+        // Enable transitions when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', enableTransitions)
+        } else {
+          enableTransitions()
+        }
       })()
     </script>
   </head>

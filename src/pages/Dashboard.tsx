@@ -6,12 +6,14 @@ import CategoryFilter from '../components/CategoryFilter'
 import DataManagement from '../components/DataManagement'
 import Navbar from '../components/Navbar'
 import TaskList from '../components/TaskList'
+import { useNotifications } from '../hooks/useNotifications'
 import { useTasks } from '../hooks/useTasks'
 import type { TaskFormData, TaskUpdate, User } from '../types'
 import { getCurrentUser, signOut } from '../utils/auth'
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate()
+  const { addNotification } = useNotifications()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -62,32 +64,93 @@ const Dashboard: React.FC = () => {
   const handleCreateTask = async (taskData: TaskFormData) => {
     try {
       await createTask(taskData)
+      addNotification({
+        type: 'success',
+        title: 'Task Created',
+        message: `"${taskData.title}" has been created successfully.`,
+        duration: 4000,
+      })
     } catch {
       setError('Failed to create task')
+      addNotification({
+        type: 'error',
+        title: 'Create Failed',
+        message: 'Unable to create task. Please try again.',
+        duration: 5000,
+      })
     }
   }
 
   const handleUpdateTask = async (taskId: string, updates: TaskUpdate) => {
     try {
       await updateTask(taskId, updates)
+
+      // Show different messages based on update type
+      if (updates.completed !== undefined) {
+        addNotification({
+          type: 'success',
+          title: updates.completed ? 'Task Completed' : 'Task Reopened',
+          message: updates.completed
+            ? 'Great job! Task marked as complete.'
+            : 'Task marked as incomplete.',
+          duration: 3000,
+        })
+      } else {
+        addNotification({
+          type: 'success',
+          title: 'Task Updated',
+          message: 'Task has been updated successfully.',
+          duration: 3000,
+        })
+      }
     } catch {
       setError('Failed to update task')
+      addNotification({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Unable to update task. Please try again.',
+        duration: 5000,
+      })
     }
   }
 
   const handleDeleteTask = async (taskId: string) => {
     try {
       await deleteTask(taskId)
+      addNotification({
+        type: 'success',
+        title: 'Task Deleted',
+        message: 'Task has been deleted successfully.',
+        duration: 4000,
+      })
     } catch {
       setError('Failed to delete task')
+      addNotification({
+        type: 'error',
+        title: 'Delete Failed',
+        message: 'Unable to delete task. Please try again.',
+        duration: 5000,
+      })
     }
   }
 
   const handleReorderTasks = async (sourceIndex: number, destinationIndex: number) => {
     try {
       await reorderTasks(sourceIndex, destinationIndex)
+      addNotification({
+        type: 'success',
+        title: 'Tasks Reordered',
+        message: 'Task order has been updated successfully.',
+        duration: 3000,
+      })
     } catch {
       setError('Failed to reorder tasks')
+      addNotification({
+        type: 'error',
+        title: 'Reorder Failed',
+        message: 'Unable to reorder tasks. Please try again.',
+        duration: 5000,
+      })
     }
   }
 
@@ -99,6 +162,29 @@ const Dashboard: React.FC = () => {
   const handleTasksUpdated = () => {
     refreshTasks()
     setSelectedTasks(new Set()) // Clear selection after bulk operations
+  }
+
+  // Handle manual refresh with toast notification
+  const handleManualRefresh = async () => {
+    const taskCountBefore = tasks.length
+    try {
+      await refreshTasks()
+      // Only show notification if there might be changes
+      // (we can't easily detect actual changes, so we show it regardless)
+      addNotification({
+        type: 'info',
+        title: 'Tasks Refreshed',
+        message: 'Your tasks have been refreshed successfully.',
+        duration: 3000,
+      })
+    } catch {
+      addNotification({
+        type: 'error',
+        title: 'Refresh Failed',
+        message: 'Unable to refresh tasks. Please try again.',
+        duration: 5000,
+      })
+    }
   }
 
   // Get user display name - ES2022: Use Array.at() for cleaner array access
@@ -168,16 +254,16 @@ const Dashboard: React.FC = () => {
             <div className="flex justify-center sm:justify-end space-x-3">
               <button
                 onClick={() => setShowDataManagement(!showDataManagement)}
-                className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-purple-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-purple-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors text-sm font-medium"
+                className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white sm:bg-white sm:hover:bg-gray-50 sm:text-gray-700 sm:dark:bg-gray-800 sm:dark:hover:bg-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors text-sm font-medium"
               >
                 <Database className="h-4 w-4 mr-2" />
                 Data Management
               </button>
 
               <button
-                onClick={refreshTasks}
+                onClick={handleManualRefresh}
                 disabled={tasksLoading}
-                className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 sm:bg-white sm:dark:bg-gray-800 text-white sm:text-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg hover:bg-blue-700 sm:hover:bg-gray-50 sm:dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
+                className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white sm:bg-white sm:hover:bg-gray-50 sm:text-gray-700 sm:dark:bg-gray-800 sm:dark:hover:bg-gray-700 sm:dark:text-gray-200 border border-transparent sm:border-gray-300 sm:dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 transition-colors text-sm font-medium"
               >
                 <SettingsIcon className="h-4 w-4 mr-2" />
                 Refresh

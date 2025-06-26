@@ -1,6 +1,7 @@
 import { Clock, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import ThemeToggle from '../components/ThemeToggle'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -57,6 +58,7 @@ const Contact = () => {
               </span>
             </Link>
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <Link
                 to="/"
                 className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"

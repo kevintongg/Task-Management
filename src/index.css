@@ -38,6 +38,33 @@
     scroll-behavior: smooth;
   }
 
+  /* Prevent theme flash during initial load and transitions */
+  .theme-loading,
+  .theme-loading *,
+  .theme-transitioning,
+  .theme-transitioning * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Specifically disable all color and background transitions during theme change */
+  .theme-transitioning .transition-colors,
+  .theme-transitioning .transition-all,
+  .theme-transitioning [class*='transition-'] {
+    transition: none !important;
+  }
+
+  /* Ensure proper initial styling before theme is applied */
+  html:not([data-theme]) {
+    background-color: #f9fafb; /* light mode background */
+    color: #111827; /* light mode text */
+  }
+
+  html:not([data-theme]) body {
+    background-color: #f9fafb;
+    color: #111827;
+  }
+
   body {
     @apply font-sans antialiased text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -46,6 +73,36 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Ensure body starts with light theme colors to prevent flash */
+    background-color: #f9fafb;
+    color: #111827;
+  }
+
+  /* Apply dark theme colors only when dark class is present */
+  .dark body {
+    background-color: #111827;
+    color: #ffffff;
+  }
+
+  /* Ensure root element has proper default styling */
+  #root {
+    min-height: 100vh;
+    background-color: inherit;
+    color: inherit;
+  }
+
+  /* Improve dark mode transitions for all elements */
+  * {
+    color-scheme: light dark;
+  }
+
+  /* Specifically handle background transitions during theme switches */
+  .theme-transitioning [class*='bg-white'],
+  .theme-transitioning [class*='dark:bg-gray'],
+  .theme-transitioning [class*='bg-gray'],
+  .theme-transitioning [class*='dark:bg-white'] {
+    background-color: inherit !important;
+    transition: none !important;
   }
 
   /* Prevent transition during initial load */

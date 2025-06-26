@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthForm from '../components/AuthForm'
 import OAuthButtons from '../components/OAuthButtons'
+import ThemeToggle from '../components/ThemeToggle'
 import type { AuthFormData } from '../types'
 import { signUpWithEmail } from '../utils/auth'
 
@@ -33,7 +34,12 @@ const Signup: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 relative">
+      {/* Floating Theme Toggle */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+
       <div className="max-w-md w-full">
         <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg px-8 py-10">
           <div className="space-y-8">

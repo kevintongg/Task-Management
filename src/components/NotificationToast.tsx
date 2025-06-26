@@ -51,7 +51,7 @@ const NotificationToast: React.FC = () => {
         <div
           key={notification.id}
           className={`
-            max-w-sm w-full pointer-events-auto
+            min-w-80 max-w-md w-auto pointer-events-auto
             border rounded-lg shadow-lg
             transform transition-all duration-300 ease-in-out
             animate-in slide-in-from-right-full

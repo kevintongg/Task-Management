@@ -69,7 +69,7 @@ const BulkTaskActions = ({
         addNotification({
           type: 'success',
           title: 'Tasks Deleted',
-          message: `Successfully deleted ${result.success} task(s).`,
+          message: `Successfully deleted ${result.success} ${result.success === 1 ? 'task' : 'tasks'}.`,
           duration: 5000,
         })
         onSelectionChange(new Set())
@@ -80,7 +80,7 @@ const BulkTaskActions = ({
         addNotification({
           type: 'warning',
           title: 'Deletion Issues',
-          message: `${result.failed} task(s) could not be deleted. ${result.errors.join(', ')}`,
+          message: `${result.failed} ${result.failed === 1 ? 'task' : 'tasks'} could not be deleted. ${result.errors.join(', ')}`,
           duration: 8000,
         })
       }
@@ -113,7 +113,7 @@ const BulkTaskActions = ({
         addNotification({
           type: 'success',
           title: completed ? 'Tasks Completed' : 'Tasks Marked Incomplete',
-          message: `Successfully updated ${result.success} task(s).`,
+          message: `Successfully updated ${result.success} ${result.success === 1 ? 'task' : 'tasks'}.`,
           duration: 5000,
         })
         onTasksUpdated()
@@ -122,7 +122,7 @@ const BulkTaskActions = ({
           addNotification({
             type: 'warning',
             title: 'Update Issues',
-            message: `${result.failed} task(s) could not be updated. ${result.errors.join(', ')}`,
+            message: `${result.failed} ${result.failed === 1 ? 'task' : 'tasks'} could not be updated. ${result.errors.join(', ')}`,
             duration: 8000,
           })
         }
@@ -166,7 +166,7 @@ const BulkTaskActions = ({
         addNotification({
           type: 'success',
           title: 'Category Updated',
-          message: `Successfully moved ${result.success} task(s) to "${categoryName}".`,
+          message: `Successfully moved ${result.success} ${result.success === 1 ? 'task' : 'tasks'} to "${categoryName}".`,
           duration: 5000,
         })
         onTasksUpdated()
@@ -175,7 +175,7 @@ const BulkTaskActions = ({
         addNotification({
           type: 'warning',
           title: 'Category Update Issues',
-          message: `${result.failed} task(s) could not be updated. ${result.errors.join(', ')}`,
+          message: `${result.failed} ${result.failed === 1 ? 'task' : 'tasks'} could not be updated. ${result.errors.join(', ')}`,
           duration: 8000,
         })
       }
@@ -207,7 +207,7 @@ const BulkTaskActions = ({
         addNotification({
           type: 'success',
           title: 'Priority Updated',
-          message: `Successfully updated ${result.success} task(s) to ${priority} priority.`,
+          message: `Successfully updated ${result.success} ${result.success === 1 ? 'task' : 'tasks'} to ${priority} priority.`,
           duration: 5000,
         })
         onTasksUpdated()
@@ -216,7 +216,7 @@ const BulkTaskActions = ({
         addNotification({
           type: 'warning',
           title: 'Priority Update Issues',
-          message: `${result.failed} task(s) could not be updated. ${result.errors.join(', ')}`,
+          message: `${result.failed} ${result.failed === 1 ? 'task' : 'tasks'} could not be updated. ${result.errors.join(', ')}`,
           duration: 8000,
         })
       }
@@ -245,7 +245,7 @@ const BulkTaskActions = ({
     addNotification({
       type: 'success',
       title: 'Export Complete',
-      message: `Successfully exported ${selectedTasks.size} selected task(s) as CSV.`,
+      message: `Successfully exported ${selectedTasks.size} selected ${selectedTasks.size === 1 ? 'task' : 'tasks'} as CSV.`,
       duration: 5000,
     })
   }
@@ -461,7 +461,7 @@ const BulkTaskActions = ({
 
           {loading && (
             <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-              Processing {selectedTasks.size} task(s)...
+              Processing {selectedTasks.size} {selectedTasks.size === 1 ? 'task' : 'tasks'}...
             </div>
           )}
         </div>

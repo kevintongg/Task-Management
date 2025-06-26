@@ -25,10 +25,16 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Since the theme is already applied by the blocking script,
-    // we just need to read the current state
-    if (typeof document !== 'undefined' && document.documentElement?.classList.contains('dark')) {
-      return 'dark'
+    // Read from data-theme attribute set by the blocking script for better reliability
+    if (typeof document !== 'undefined') {
+      const dataTheme = document.documentElement.getAttribute('data-theme')
+      if (dataTheme === 'dark' || dataTheme === 'light') {
+        return dataTheme
+      }
+      // Fallback to class check
+      if (document.documentElement.classList.contains('dark')) {
+        return 'dark'
+      }
     }
     return 'light'
   })
@@ -45,13 +51,25 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       localStorage.setItem('theme', theme)
     }
 
-    // Update document class with smooth transition (guard against SSR/test environments)
+    // Update document class and data attribute (guard against SSR/test environments)
     if (typeof document !== 'undefined') {
+      // Temporarily add class to prevent transitions during theme change
+      document.documentElement.classList.add('theme-transitioning')
+
       if (theme === 'dark') {
         document.documentElement.classList.add('dark')
+        document.documentElement.setAttribute('data-theme', 'dark')
       } else {
         document.documentElement.classList.remove('dark')
+        document.documentElement.setAttribute('data-theme', 'light')
       }
+
+      // Remove transition-blocking class after a short delay
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.documentElement.classList.remove('theme-transitioning')
+        })
+      })
     }
   }, [theme])
 
