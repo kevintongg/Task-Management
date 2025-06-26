@@ -68,9 +68,8 @@ const OAuthButtons: React.FC<OAuthButtonsProps> = ({ onError, className = '' }) 
         {isLoading === 'azure' ? (
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-700 dark:border-gray-200 mr-3"></div>
         ) : (
-          <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M11.4 24H0L7.7 8.2L11.4 24zM24 24h-4.6l-9.2-12.2L18.8 0H24L15.4 10L24 24z" />
-            <path d="M12.2 13.8l6.6-13.8H0l7.7 15.8L12.2 13.8z" opacity="0.6" />
+          <svg className="w-5 h-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M0 0h9v9H0zm10 0h9v9h-9zM0 10h9v9H0zm10 0h9v9h-9z" />
           </svg>
         )}
         {isLoading === 'azure' ? 'Signing in...' : 'Continue with Microsoft'}

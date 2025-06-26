@@ -384,28 +384,28 @@ const Home = () => {
               <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Product</h3>
               <ul className="space-y-2 text-gray-600 dark:text-gray-400">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/features"
                     className="hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Features
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/pricing"
                     className="hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Pricing
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/security"
                     className="hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Security
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -413,28 +413,28 @@ const Home = () => {
               <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Company</h3>
               <ul className="space-y-2 text-gray-600 dark:text-gray-400">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/about"
                     className="hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     About
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/contact"
                     className="hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Contact
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/support"
                     className="hover:text-gray-900 dark:hover:text-white transition-colors"
                   >
                     Support
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
