@@ -16,6 +16,8 @@ const ResetPassword = () => {
   useEffect(() => {
     // Check for access_token in URL on component mount
     const accessToken = searchParams.get('access_token')
+    console.log('ResetPassword: searchParams', searchParams.toString())
+    console.log('ResetPassword: accessToken', accessToken)
     if (!accessToken) {
       setError('Invalid password reset link. Missing access token.')
     }
@@ -65,7 +67,7 @@ const ResetPassword = () => {
             confirmPassword={confirmPassword}
             setConfirmPassword={setConfirmPassword}
             loading={loading}
-            message={message}
+            success={message}
             error={error}
           />
         </div>

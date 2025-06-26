@@ -1,6 +1,6 @@
-import type { AuthChangeEvent } from '@supabase/supabase-js'
-import type { AuthFormData, User } from '../types'
-import { handleSupabaseError, supabase } from './supabase'
+import type { AuthChangeEvent } from '@supabase/supabase-js';
+import type { AuthFormData, User } from '../types';
+import { handleSupabaseError, supabase } from './supabase';
 
 /**
  * Sign up a new user with email and password
@@ -112,19 +112,31 @@ export const resetPassword = async (
   email: string
 ): Promise<{ error: string | null; message?: string }> => {
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    console.log('resetPassword: Sending reset email to', email)
+
+    // Always return the same message regardless of whether the email exists
+    // This is a security best practice to avoid revealing whether accounts exist
+    const securityMessage = 'If an account with that email address exists, we have sent you a password reset link. Please check your email (including spam folder) and follow the instructions to reset your password.'
+
+    // Fire-and-forget approach: start the email sending but don't wait for it
+    // This ensures consistent fast response times regardless of email validity
+    supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
+    }).catch(error => {
+      // Log errors but don't expose them to prevent information leakage
+      console.error('resetPassword: Background email sending failed', error)
     })
 
-    if (error) {
-      return { error: handleSupabaseError(error, 'Reset password') }
-    }
+    // Add minimal consistent delay to prevent micro-timing attacks (100-200ms)
+    await new Promise(resolve => setTimeout(resolve, 150))
 
+    // Always return success message quickly
     return {
       error: null,
-      message: 'Password reset email sent. Please check your inbox.',
+      message: securityMessage,
     }
   } catch (error) {
+    console.error('resetPassword: Catch error', error)
     return { error: handleSupabaseError(error, 'Reset password') }
   }
 }

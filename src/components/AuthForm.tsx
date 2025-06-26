@@ -83,30 +83,35 @@ const AuthForm: React.FC<AuthFormPropsExtended> = ({
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {}
 
-    // Email validation
+    // Email validation for forgot password, login, and signup
     if (isForgotPassword || mode === 'login' || mode === 'signup') {
-      if (!formData.email.trim()) {
+      const emailValue = email !== undefined ? email : formData.email
+      if (!emailValue.trim()) {
         errors.email = 'Email is required'
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
         errors.email = 'Please enter a valid email address'
       }
     }
 
-    // Password validation (for login, signup, reset-password)
-    if (mode === 'login' || mode === 'signup' || isResetPassword) {
-      if (!formData.password) {
+    // Password validation (for login, signup, reset-password) - NOT for forgot password
+    if (!isForgotPassword && (mode === 'login' || mode === 'signup' || isResetPassword)) {
+      const passwordValue = password !== undefined ? password : formData.password
+      if (!passwordValue) {
         errors.password = 'Password is required'
-      } else if (formData.password.length < 6) {
+      } else if (passwordValue.length < 6) {
         errors.password = 'Password must be at least 6 characters long'
       }
     }
 
     // Signup and Reset Password specific validation
     if (isSignup || isResetPassword) {
+      const confirmPasswordValue =
+        confirmPassword !== undefined ? confirmPassword : formData.confirmPassword
+      const passwordValue = password !== undefined ? password : formData.password
       // Confirm password validation
-      if (!formData.confirmPassword) {
+      if (!confirmPasswordValue) {
         errors.confirmPassword = 'Please confirm your password'
-      } else if (formData.password !== formData.confirmPassword) {
+      } else if (passwordValue !== confirmPasswordValue) {
         errors.confirmPassword = 'Passwords do not match'
       }
     }
@@ -131,9 +136,16 @@ const AuthForm: React.FC<AuthFormPropsExtended> = ({
     }
 
     if (isForgotPassword) {
-      ;(onSubmit as (email: string) => Promise<void>)(formData.email)
+      const emailValue = email !== undefined ? email : formData.email
+      ;(onSubmit as (data: { email: string }) => Promise<void>)({ email: emailValue })
     } else if (isResetPassword) {
-      ;(onSubmit as (data: { password: string; confirmPassword: string }) => Promise<void>)({ password: formData.password, confirmPassword: formData.confirmPassword })
+      const passwordValue = password !== undefined ? password : formData.password
+      const confirmPasswordValue =
+        confirmPassword !== undefined ? confirmPassword : formData.confirmPassword
+      ;(onSubmit as (data: { password: string; confirmPassword: string }) => Promise<void>)({
+        password: passwordValue,
+        confirmPassword: confirmPasswordValue,
+      })
     } else {
       // Call the onSubmit handler with form data for login/signup
       const authData: AuthFormData = {
@@ -167,56 +179,72 @@ const AuthForm: React.FC<AuthFormPropsExtended> = ({
     toggleValue?: boolean
     onToggle?: (() => void) | null
   }) => (
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Icon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-      </div>
+    <div className="flex flex-col">
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+        </div>
 
-      <input
-        type={showToggle && showValue ? 'text' : type}
-        name={name}
-        value={name === 'email' ? email : name === 'password' ? password : name === 'confirmPassword' ? confirmPassword : formData[name as keyof typeof formData]}
-        onChange={e => handleInputChange(name, e.target.value)}
-        className={`
-          block w-full pl-10 pr-10 py-3 border rounded-lg
-          bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-          transition-colors duration-200
-          ${
-            validationErrors[name]
-              ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
-              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+        <input
+          type={showToggle && showValue ? 'text' : type}
+          name={name}
+          value={
+            name === 'email'
+              ? email !== undefined
+                ? email
+                : formData.email
+              : name === 'password'
+                ? password !== undefined
+                  ? password
+                  : formData.password
+                : name === 'confirmPassword'
+                  ? confirmPassword !== undefined
+                    ? confirmPassword
+                    : formData.confirmPassword
+                  : formData[name as keyof typeof formData]
           }
-        `}
-        placeholder={placeholder}
-        disabled={loading}
-        autoComplete={
-          name === 'email'
-            ? 'email'
-            : name === 'password'
-              ? isSignup || isResetPassword
-                ? 'new-password'
-                : 'current-password'
-              : name === 'confirmPassword'
-                ? 'new-password'
-                : 'name'
-        }
-      />
-
-      {showToggle && onToggle && (
-        <button
-          type="button"
-          className="absolute inset-y-0 right-0 pr-3 flex items-center"
-          onClick={onToggle}
+          onChange={e => handleInputChange(name, e.target.value)}
+          className={`
+            block w-full pl-10 pr-10 py-3 border rounded-lg
+            bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            transition-colors duration-200
+            ${
+              validationErrors[name]
+                ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
+                : 'border-gray-300 dark:border-600 hover:border-gray-400 dark:hover:border-gray-500'
+            }
+          `}
+          placeholder={placeholder}
           disabled={loading}
-        >
-          {toggleValue ? (
-            <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" />
-          ) : (
-            <Eye className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" />
-          )}
-        </button>
-      )}
+          autoComplete={
+            name === 'email'
+              ? 'email'
+              : name === 'password'
+                ? isSignup || isResetPassword
+                  ? 'new-password'
+                  : 'current-password'
+                : name === 'confirmPassword'
+                  ? 'new-password'
+                  : 'name'
+          }
+        />
+
+        {showToggle && onToggle && (
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            onClick={onToggle}
+            disabled={loading}
+          >
+            {toggleValue ? (
+              <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" />
+            ) : (
+              <Eye className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" />
+            )}
+          </button>
+        )}
+      </div>
 
       {validationErrors[name] && (
         <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
@@ -230,14 +258,16 @@ const AuthForm: React.FC<AuthFormPropsExtended> = ({
   return (
     <div className="w-full max-w-md mx-auto">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-          {isSignup ? 'Create Account' : 'Welcome Back'}
-        </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
-          {isSignup ? 'Sign up to start managing your tasks' : 'Sign in to access your tasks'}
-        </p>
-      </div>
+      {!(isForgotPassword || isResetPassword) && (
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {isSignup ? 'Create Account' : 'Welcome Back'}
+          </h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">
+            {isSignup ? 'Sign up to start managing your tasks' : 'Sign in to access your tasks'}
+          </p>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -302,7 +332,7 @@ const AuthForm: React.FC<AuthFormPropsExtended> = ({
         )}
 
         {/* Password field (login, signup, reset-password) */}
-        {(mode === 'login' || mode === 'signup' || isResetPassword) && (
+        {!isForgotPassword && (mode === 'login' || mode === 'signup' || isResetPassword) && (
           <div>
             <label
               htmlFor="password"
@@ -324,7 +354,7 @@ const AuthForm: React.FC<AuthFormPropsExtended> = ({
         )}
 
         {/* Confirm Password field (signup and reset-password) */}
-        {(isSignup || isResetPassword) && (
+        {!isForgotPassword && (isSignup || isResetPassword) && (
           <div>
             <label
               htmlFor="confirmPassword"
