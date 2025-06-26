@@ -54,6 +54,7 @@ Thumbs.db
 *.temp
 .tmp
 .temp
+commit_message.txt
 
 # Editor directories and files
 .vscode/

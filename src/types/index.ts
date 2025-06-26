@@ -169,10 +169,12 @@ export interface NavbarProps {
 }
 
 export interface AuthFormProps {
-  mode: 'login' | 'signup'
-  onSubmit: (data: AuthFormData) => Promise<void>
+  mode?: 'login' | 'signup'
+  formType?: 'login' | 'signup' | 'forgot-password' | 'reset-password'
+  onSubmit: ((data: AuthFormData) => Promise<void>) | ((email: string) => Promise<void>) | ((data: { password: string; confirmPassword: string }) => Promise<void>)
   loading?: boolean
   error?: string | null
+  message?: string | null
 }
 
 // Hook return types

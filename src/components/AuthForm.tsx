@@ -12,24 +12,38 @@ import type { AuthFormData, AuthFormProps } from '../types'
  * @param {string} props.success - Success message
  * @param {Function} props.onModeChange - Handler for switching between login/signup
  */
-const AuthForm: React.FC<
-  AuthFormProps & {
-    success?: string | null
-    onModeChange?: (() => void) | null
-  }
-> = ({
+interface AuthFormPropsExtended extends AuthFormProps {
+  success?: string | null
+  onModeChange?: (() => void) | null
+  // Add specific props for forgot/reset password forms
+  email?: string
+  setEmail?: (email: string) => void
+  password?: string
+  setPassword?: (password: string) => void
+  confirmPassword?: string
+  setConfirmPassword?: (confirmPassword: string) => void
+}
+
+const AuthForm: React.FC<AuthFormPropsExtended> = ({
   mode = 'login',
+  formType = 'login', // Add formType prop
   onSubmit,
   loading = false,
   error = null,
   success = null,
   onModeChange = null,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  confirmPassword,
+  setConfirmPassword,
 }) => {
   // Form state
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
+    email: email || '',
+    password: password || '',
+    confirmPassword: confirmPassword || '',
     name: '',
   })
 
@@ -40,12 +54,22 @@ const AuthForm: React.FC<
 
   // Determine if we're in signup mode
   const isSignup = mode === 'signup'
+  const isForgotPassword = formType === 'forgot-password'
+  const isResetPassword = formType === 'reset-password'
 
   /**
    * Handle input changes with validation
    */
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    if (field === 'email' && setEmail) {
+      setEmail(value)
+    } else if (field === 'password' && setPassword) {
+      setPassword(value)
+    } else if (field === 'confirmPassword' && setConfirmPassword) {
+      setConfirmPassword(value)
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
 
     // Clear validation error for this field
     if (validationErrors[field]) {
@@ -60,32 +84,36 @@ const AuthForm: React.FC<
     const errors: Record<string, string> = {}
 
     // Email validation
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address'
-    }
-
-    // Password validation
-    if (!formData.password) {
-      errors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters long'
-    }
-
-    // Signup-specific validation
-    if (isSignup) {
-      // Name validation
-      if (!formData.name.trim()) {
-        errors.name = 'Name is required'
+    if (isForgotPassword || mode === 'login' || mode === 'signup') {
+      if (!formData.email.trim()) {
+        errors.email = 'Email is required'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        errors.email = 'Please enter a valid email address'
       }
+    }
 
+    // Password validation (for login, signup, reset-password)
+    if (mode === 'login' || mode === 'signup' || isResetPassword) {
+      if (!formData.password) {
+        errors.password = 'Password is required'
+      } else if (formData.password.length < 6) {
+        errors.password = 'Password must be at least 6 characters long'
+      }
+    }
+
+    // Signup and Reset Password specific validation
+    if (isSignup || isResetPassword) {
       // Confirm password validation
       if (!formData.confirmPassword) {
         errors.confirmPassword = 'Please confirm your password'
       } else if (formData.password !== formData.confirmPassword) {
         errors.confirmPassword = 'Passwords do not match'
       }
+    }
+
+    // Signup-specific validation (name)
+    if (isSignup && !formData.name.trim()) {
+      errors.name = 'Name is required'
     }
 
     setValidationErrors(errors)
@@ -102,13 +130,19 @@ const AuthForm: React.FC<
       return
     }
 
-    // Call the onSubmit handler with form data
-    const authData: AuthFormData = {
-      email: formData.email.trim(),
-      password: formData.password,
-      name: isSignup ? formData.name.trim() : undefined,
+    if (isForgotPassword) {
+      ;(onSubmit as (email: string) => Promise<void>)(formData.email)
+    } else if (isResetPassword) {
+      ;(onSubmit as (data: { password: string; confirmPassword: string }) => Promise<void>)({ password: formData.password, confirmPassword: formData.confirmPassword })
+    } else {
+      // Call the onSubmit handler with form data for login/signup
+      const authData: AuthFormData = {
+        email: formData.email.trim(),
+        password: formData.password,
+        name: isSignup ? formData.name.trim() : undefined,
+      }
+      ;(onSubmit as (data: AuthFormData) => Promise<void>)(authData)
     }
-    onSubmit(authData)
   }
 
   /**
@@ -141,7 +175,7 @@ const AuthForm: React.FC<
       <input
         type={showToggle && showValue ? 'text' : type}
         name={name}
-        value={formData[name as keyof typeof formData]}
+        value={name === 'email' ? email : name === 'password' ? password : name === 'confirmPassword' ? confirmPassword : formData[name as keyof typeof formData]}
         onChange={e => handleInputChange(name, e.target.value)}
         className={`
           block w-full pl-10 pr-10 py-3 border rounded-lg
@@ -160,7 +194,7 @@ const AuthForm: React.FC<
           name === 'email'
             ? 'email'
             : name === 'password'
-              ? isSignup
+              ? isSignup || isResetPassword
                 ? 'new-password'
                 : 'current-password'
               : name === 'confirmPassword'
@@ -249,44 +283,48 @@ const AuthForm: React.FC<
           </div>
         )}
 
-        {/* Email field */}
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Email Address
-          </label>
-          {renderInputField({
-            name: 'email',
-            type: 'email',
-            placeholder: 'Enter your email address',
-            icon: Mail,
-          })}
-        </div>
+        {/* Email field (login, signup, forgot-password) */}
+        {(mode === 'login' || mode === 'signup' || isForgotPassword) && (
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Email Address
+            </label>
+            {renderInputField({
+              name: 'email',
+              type: 'email',
+              placeholder: 'Enter your email address',
+              icon: Mail,
+            })}
+          </div>
+        )}
 
-        {/* Password field */}
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            Password
-          </label>
-          {renderInputField({
-            name: 'password',
-            type: 'password',
-            placeholder: 'Enter your password',
-            icon: Lock,
-            showToggle: true,
-            showValue: showPassword,
-            toggleValue: showPassword,
-            onToggle: () => setShowPassword(!showPassword),
-          })}
-        </div>
+        {/* Password field (login, signup, reset-password) */}
+        {(mode === 'login' || mode === 'signup' || isResetPassword) && (
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Password
+            </label>
+            {renderInputField({
+              name: 'password',
+              type: 'password',
+              placeholder: 'Enter your password',
+              icon: Lock,
+              showToggle: true,
+              showValue: showPassword,
+              toggleValue: showPassword,
+              onToggle: () => setShowPassword(!showPassword),
+            })}
+          </div>
+        )}
 
-        {/* Confirm Password field (signup only) */}
-        {isSignup && (
+        {/* Confirm Password field (signup and reset-password) */}
+        {(isSignup || isResetPassword) && (
           <div>
             <label
               htmlFor="confirmPassword"
@@ -322,17 +360,27 @@ const AuthForm: React.FC<
           {loading ? (
             <div className="flex items-center">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              {isSignup ? 'Creating Account...' : 'Signing In...'}
+              {isSignup
+                ? 'Creating Account...'
+                : isForgotPassword
+                  ? 'Sending Reset Link...'
+                  : isResetPassword
+                    ? 'Resetting Password...'
+                    : 'Signing In...'}
             </div>
           ) : isSignup ? (
             'Create Account'
+          ) : isForgotPassword ? (
+            'Send Reset Link'
+          ) : isResetPassword ? (
+            'Reset Password'
           ) : (
             'Sign In'
           )}
         </button>
 
-        {/* Mode Switch */}
-        {onModeChange && (
+        {/* Mode Switch (login/signup only) */}
+        {onModeChange && (mode === 'login' || mode === 'signup') && (
           <div className="text-center">
             <button
               type="button"

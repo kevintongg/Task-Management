@@ -100,6 +100,7 @@ A modern task management web application built with React, TypeScript, Tailwind 
 ## 🚧 **PENDING TASKS**
 
 ### **🔧 Critical Fixes Needed**
+- [x] Re-created `ForgotPassword` and `ResetPassword` pages and integrated them with `AuthForm`.
 
 ### **🔍 Testing & Quality**
 - [ ] Add comprehensive unit tests for components
