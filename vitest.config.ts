@@ -79,12 +79,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@/assets': resolve(__dirname, './src/assets'),
       '@/components': resolve(__dirname, './src/components'),
-      '@/pages': resolve(__dirname, './src/pages'),
-      '@/utils': resolve(__dirname, './src/utils'),
+      '@/contexts': resolve(__dirname, './src/contexts'),
       '@/hooks': resolve(__dirname, './src/hooks'),
-      '@/styles': resolve(__dirname, './src/styles'),
+      '@/pages': resolve(__dirname, './src/pages'),
       '@/test': resolve(__dirname, './src/test'),
+      '@/types': resolve(__dirname, './src/types'),
+      '@/utils': resolve(__dirname, './src/utils'),
     },
   },
 })
