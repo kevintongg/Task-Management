@@ -166,11 +166,8 @@ const Dashboard: React.FC = () => {
 
   // Handle manual refresh with toast notification
   const handleManualRefresh = async () => {
-    const taskCountBefore = tasks.length
     try {
       await refreshTasks()
-      // Only show notification if there might be changes
-      // (we can't easily detect actual changes, so we show it regardless)
       addNotification({
         type: 'info',
         title: 'Tasks Refreshed',

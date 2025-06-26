@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "packageManager": "pnpm@10.12.1",
   "description": "A full-stack task management web app built with React, Vite, Tailwind CSS, and Supabase",
   "scripts": {
     "dev": "vite",
